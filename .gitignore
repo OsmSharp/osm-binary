@@ -33,6 +33,7 @@ TestResults*/
 *.vspx
 *.patch
 *.osm.pbf
+*.osm.bin
 TestResult.xml
 .vs*/
 

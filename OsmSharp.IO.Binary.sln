@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{8B983F9F-6
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "OsmSharp.IO.Binary", "src\OsmSharp.IO.Binary\OsmSharp.IO.Binary.xproj", "{6882E714-3F07-48B6-A730-B36085E2A7CE}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "OsmSharp.IO.Binary.Test.Functional", "test\OsmSharp.IO.Binary.Test.Functional\OsmSharp.IO.Binary.Test.Functional.xproj", "{8A3F470E-95E5-48AD-9D01-4FDC178EBE54}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,11 +26,16 @@ Global
 		{6882E714-3F07-48B6-A730-B36085E2A7CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6882E714-3F07-48B6-A730-B36085E2A7CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6882E714-3F07-48B6-A730-B36085E2A7CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A3F470E-95E5-48AD-9D01-4FDC178EBE54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A3F470E-95E5-48AD-9D01-4FDC178EBE54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A3F470E-95E5-48AD-9D01-4FDC178EBE54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A3F470E-95E5-48AD-9D01-4FDC178EBE54}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{6882E714-3F07-48B6-A730-B36085E2A7CE} = {C9E0D165-758D-4AAE-8EEA-2D867CC2D89A}
+		{8A3F470E-95E5-48AD-9D01-4FDC178EBE54} = {8B983F9F-62A4-428E-BEAB-73EB6D4EF1A8}
 	EndGlobalSection
 EndGlobal
