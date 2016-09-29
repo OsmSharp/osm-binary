@@ -80,6 +80,7 @@ namespace OsmSharp.IO.Binary
                         }
                         break;
                 }
+                osmGeo = this.DoMoveNext();
             }
             return false;
         }
