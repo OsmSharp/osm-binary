@@ -2,7 +2,7 @@
   "version": "1.0.0-*",
 
   "dependencies": {
-    "OsmSharp.Core": "2.2.10-beta"
+    "OsmSharp": "5.0.0-rc1"
   },
 
   "frameworks": {

@@ -9,7 +9,7 @@
       "type": "platform",
       "version": "1.0.0"
     },
-    "OsmSharp.Core": "2.2.10-beta",
+    "OsmSharp": "5.0.0-rc1",
     "OsmSharp.IO.Binary": "1.0.0-*"
   },
 

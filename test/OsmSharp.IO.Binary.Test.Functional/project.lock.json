@@ -361,7 +361,7 @@
           "System.Xml.XDocument": "4.0.11"
         }
       },
-      "OsmSharp.Core/2.2.10-beta": {
+      "OsmSharp/5.0.0-rc1": {
         "type": "package",
         "dependencies": {
           "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
@@ -2142,7 +2142,7 @@
         "framework": ".NETStandard,Version=v1.3",
         "dependencies": {
           "NETStandard.Library": "1.6.0",
-          "OsmSharp.Core": "2.2.10-beta",
+          "OsmSharp": "5.0.0-rc1",
           "System.Xml.XmlSerializer": "4.0.11",
           "protobuf-net": "2.1.0"
         },
@@ -2605,13 +2605,13 @@
         "dotnet_library_license.txt"
       ]
     },
-    "OsmSharp.Core/2.2.10-beta": {
-      "sha512": "KR487n1iJOpR9UAMRJGFk0TKbI7WdFUzSiZ6kUR7U7Zdt4jldeQLMAS7tnX79PbIw/pY7UH+FecvKwbOJmRMhQ==",
+    "OsmSharp/5.0.0-rc1": {
+      "sha512": "+MPKu7mn9zrZu9KoR7JHDjb9Pbt42fiHHOfRG1L4aTcYS15hGqvn7+n49Lqog0WCUjGGca8+yw+SWcwm7GMlHA==",
       "type": "package",
-      "path": "OsmSharp.Core/2.2.10-beta",
+      "path": "OsmSharp/5.0.0-rc1",
       "files": [
-        "OsmSharp.Core.2.2.10-beta.nupkg.sha512",
-        "OsmSharp.Core.nuspec",
+        "OsmSharp.5.0.0-rc1.nupkg.sha512",
+        "OsmSharp.nuspec",
         "lib/net40/OsmSharp.dll",
         "lib/net45/OsmSharp.dll",
         "lib/netstandard1.3/OsmSharp.dll",
@@ -7005,7 +7005,7 @@
   "projectFileDependencyGroups": {
     "": [
       "Microsoft.NETCore.App >= 1.0.0",
-      "OsmSharp.Core >= 2.2.10-beta",
+      "OsmSharp >= 5.0.0-rc1",
       "OsmSharp.IO.Binary >= 1.0.0-*"
     ],
     ".NETCoreApp,Version=v1.0": []
