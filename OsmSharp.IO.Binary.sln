@@ -1,20 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C9E0D165-758D-4AAE-8EEA-2D867CC2D89A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C0BFE4B3-A433-4E89-9659-AFFD0D3509F5}"
-	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{8B983F9F-62A4-428E-BEAB-73EB6D4EF1A8}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "OsmSharp.IO.Binary", "src\OsmSharp.IO.Binary\OsmSharp.IO.Binary.xproj", "{6882E714-3F07-48B6-A730-B36085E2A7CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OsmSharp.IO.Binary", "src\OsmSharp.IO.Binary\OsmSharp.IO.Binary.csproj", "{6882E714-3F07-48B6-A730-B36085E2A7CE}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "OsmSharp.IO.Binary.Test.Functional", "test\OsmSharp.IO.Binary.Test.Functional\OsmSharp.IO.Binary.Test.Functional.xproj", "{8A3F470E-95E5-48AD-9D01-4FDC178EBE54}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OsmSharp.IO.Binary.Test.Functional", "test\OsmSharp.IO.Binary.Test.Functional\OsmSharp.IO.Binary.Test.Functional.csproj", "{8A3F470E-95E5-48AD-9D01-4FDC178EBE54}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuspec", "nuspec", "{9FB8B6EF-2093-4E0D-B97E-950D14797F57}"
+	ProjectSection(SolutionItems) = preProject
+		nuspec\OsmSharp.IO.Binary.nuspec = nuspec\OsmSharp.IO.Binary.nuspec
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

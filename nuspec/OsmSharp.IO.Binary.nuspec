@@ -10,12 +10,12 @@
         <projectUrl>http://www.osmsharp.com/</projectUrl>
 	<iconUrl>http://www.osmsharp.com/logos/osmsharp_logo64.png</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>OsmSharp an OpenStreetMap (OSM) library for .NET.</description>
-        <summary>OsmSharp an OpenStreetMap (OSM) library for .NET to read/write/process/work with OSM-data.</summary>
+        <description>A binary IO package for OsmSharp.</description>
+        <summary>A binary IO package for OsmSharp.</summary>
         <copyright>Ben Abelshausen</copyright>
         <tags>osm, openstreetmap</tags>
         <dependencies>
-            <dependency id="OsmSharp" version="5.0.0-rc1" />
+            <dependency id="OsmSharp" version="5.0.8" />
         </dependencies>
     </metadata>
     <files>
