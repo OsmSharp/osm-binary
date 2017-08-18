@@ -10,6 +10,15 @@ namespace OsmSharp.IO.Binary
         
         public static int Append(this Stream stream, Node node)
         {
+            if (node == null) { throw new ArgumentNullException(nameof(node)); }
+            if (node.Id == null) { throw new ArgumentException("Object needs to have an id."); }
+            if (node.ChangeSetId == null) { throw new ArgumentException("Object needs to have an changeset id."); }
+            if (node.TimeStamp == null) { throw new ArgumentException("Object needs to have an timestamp."); }
+            if (node.Version == null) { throw new ArgumentException("Object needs to have a version #."); }
+
+            if (node.Latitude == null) { throw new ArgumentException("Object needs to have a latitude set."); }
+            if (node.Longitude == null) { throw new ArgumentException("Object needs to have a longitude set."); }
+
             var size = 0;
 
             // write data.
@@ -25,6 +34,12 @@ namespace OsmSharp.IO.Binary
 
         public static int Append(this Stream stream, Way way)
         {
+            if (way == null) { throw new ArgumentNullException(nameof(way)); }
+            if (way.Id == null) { throw new ArgumentException("Object needs to have an id."); }
+            if (way.ChangeSetId == null) { throw new ArgumentException("Object needs to have an changeset id."); }
+            if (way.TimeStamp == null) { throw new ArgumentException("Object needs to have an timestamp."); }
+            if (way.Version == null) { throw new ArgumentException("Object needs to have a version #."); }
+
             var size = 0;
 
             // write data.
@@ -51,6 +66,12 @@ namespace OsmSharp.IO.Binary
 
         public static int Append(this Stream stream, Relation relation)
         {
+            if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
+            if (relation.Id == null) { throw new ArgumentException("Object needs to have an id."); }
+            if (relation.ChangeSetId == null) { throw new ArgumentException("Object needs to have an changeset id."); }
+            if (relation.TimeStamp == null) { throw new ArgumentException("Object needs to have an timestamp."); }
+            if (relation.Version == null) { throw new ArgumentException("Object needs to have a version #."); }
+
             var size = 0;
 
             // write data.
@@ -99,6 +120,7 @@ namespace OsmSharp.IO.Binary
             size += stream.Write(osmGeo.UserId.Value);
             size += stream.WriteWithSize(osmGeo.UserName);
             size += stream.Write(osmGeo.Version.Value);
+            size += stream.Write(osmGeo.Visible);
 
             if (osmGeo.Tags == null ||
                 osmGeo.Tags.Count == 0)
@@ -203,6 +225,7 @@ namespace OsmSharp.IO.Binary
                         Type = type
                     };
                 }
+                relation.Members = members;
             }
 
             return relation;
@@ -216,6 +239,7 @@ namespace OsmSharp.IO.Binary
             osmGeo.UserId = stream.ReadInt64(buffer);
             osmGeo.UserName = stream.ReadWithSizeString(buffer);
             osmGeo.Version = stream.ReadInt32(buffer);
+            osmGeo.Visible = stream.ReadBoolNullable();
 
             var tagsSize = stream.ReadInt32(buffer);
             if (tagsSize > 0)
@@ -262,6 +286,23 @@ namespace OsmSharp.IO.Binary
             return 8;
         }
 
+        public static int Write(this Stream stream, bool? value)
+        {
+            if (value == null)
+            {
+                stream.WriteByte(0);
+            }
+            else if(value.Value)
+            {
+                stream.WriteByte(1);
+            }
+            else
+            {
+                stream.WriteByte(2);
+            }
+            return 4;
+        }
+
         private static int WriteWithSize(this Stream stream, string value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -270,7 +311,7 @@ namespace OsmSharp.IO.Binary
                 return 1;
             }
             else
-            {
+            { // TODO: improve this based on the protobuf way of handling this kind of variable info.
                 var bytes = System.Text.Encoding.Unicode.GetBytes(value);
                 var position = 0;
                 while(bytes.Length - position >= 255)
@@ -303,6 +344,27 @@ namespace OsmSharp.IO.Binary
         {
             stream.Read(buffer, 0, 4);
             return BitConverter.ToInt32(buffer, 0);
+        }
+
+        private static bool? ReadBoolNullable(this Stream stream)
+        {
+            var v = stream.ReadByte();
+            if (v == 0)
+            {
+                return null;
+            }
+            else if (v == 1)
+            {
+                return true;
+            }
+            else if(v == 2)
+            {
+                return false;
+            }
+            else
+            {
+                throw new InvalidDataException("Cannot deserialize nullable bool.");
+            }
         }
 
         private static float ReadSingle(this Stream stream, byte[] buffer)
