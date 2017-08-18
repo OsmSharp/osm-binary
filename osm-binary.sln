@@ -17,9 +17,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		build.bat = build.bat
 		build.sh = build.sh
+		INDEX.md = INDEX.md
 		LICENSE.md = LICENSE.md
 		README.md = README.md
 		SharedAssemblyVersion.cs = SharedAssemblyVersion.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{DE1A6CC0-47AE-48F5-ACE3-0873E1E3523B}"
+	ProjectSection(SolutionItems) = preProject
+		docs\docfx.json = docs\docfx.json
+		docs\INDEX.md = docs\INDEX.md
+		docs\toc.yml = docs\toc.yml
 	EndProjectSection
 EndProject
 Global
