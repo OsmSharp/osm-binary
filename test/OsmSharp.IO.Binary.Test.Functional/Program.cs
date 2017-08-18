@@ -21,7 +21,7 @@ namespace OsmSharp.IO.Binary.Test.Functional
                 var progress = new OsmSharp.Streams.Filters.OsmStreamFilterProgress();
                 progress.RegisterSource(source);
 
-                var target = new OsmSharp.IO.Binary.BinaryOsmStreamTarget(targetStream);
+                var target = new OsmSharp.Streams.BinaryOsmStreamTarget(targetStream);
                 target.RegisterSource(progress);
                 target.Pull();
             }
@@ -29,7 +29,7 @@ namespace OsmSharp.IO.Binary.Test.Functional
             using (var sourceStream = File.OpenRead("test.osm.bin"))
             using (var targetStream = File.OpenWrite("test2.osm.pbf"))
             {
-                var source = new OsmSharp.IO.Binary.BinaryOsmStreamSource(sourceStream);
+                var source = new OsmSharp.Streams.BinaryOsmStreamSource(sourceStream);
                 var progress = new OsmSharp.Streams.Filters.OsmStreamFilterProgress();
                 progress.RegisterSource(source);
 

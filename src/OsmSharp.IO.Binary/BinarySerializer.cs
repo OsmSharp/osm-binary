@@ -1,13 +1,41 @@
-﻿using OsmSharp.Tags;
+﻿// The MIT License (MIT)
+
+// Copyright (c) 2017 Ben Abelshausen
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+using OsmSharp.Tags;
 using System;
 using System.IO;
 
 namespace OsmSharp.IO.Binary
 {
+    /// <summary>
+    /// Contains all binary formatting code.
+    /// </summary>
     public static class BinarySerializer
     {
         private static System.Text.Encoder _encoder = (new System.Text.UnicodeEncoding()).GetEncoder();
         
+        /// <summary>
+        /// Writes the given node starting at the stream's current position.
+        /// </summary>
         public static int Append(this Stream stream, Node node)
         {
             if (node == null) { throw new ArgumentNullException(nameof(node)); }
@@ -32,6 +60,9 @@ namespace OsmSharp.IO.Binary
             return size;
         }
 
+        /// <summary>
+        /// Writes the given way starting at the stream's current position.
+        /// </summary>
         public static int Append(this Stream stream, Way way)
         {
             if (way == null) { throw new ArgumentNullException(nameof(way)); }
@@ -64,6 +95,9 @@ namespace OsmSharp.IO.Binary
             return size;
         }
 
+        /// <summary>
+        /// Writes the given relation starting at the stream's current position.
+        /// </summary>
         public static int Append(this Stream stream, Relation relation)
         {
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
@@ -141,7 +175,10 @@ namespace OsmSharp.IO.Binary
 
             return size;
         }
-
+        
+        /// <summary>
+        /// Reads an OSM object starting at the stream's current position.
+        /// </summary>
         public static OsmGeo ReadOsmGeo(this Stream stream, byte[] buffer)
         {
             var type = stream.ReadByte();
@@ -256,25 +293,28 @@ namespace OsmSharp.IO.Binary
             }
         }
 
+        /// <summary>
+        /// Writes the given value to the stream.
+        /// </summary>
         public static int Write(this Stream stream, int value)
         {
             stream.Write(BitConverter.GetBytes(value), 0, 4);
             return 4;
         }
-
+        
         private static int Write(this Stream stream, float value)
         {
             stream.Write(BitConverter.GetBytes(value), 0, 4);
             return 4;
         }
 
-        public static int Write(this Stream stream, long value)
+        private static int Write(this Stream stream, long value)
         {
             stream.Write(BitConverter.GetBytes(value), 0, 8);
             return 8;
         }
 
-        public static int Write(this Stream stream, ulong value)
+        private static int Write(this Stream stream, ulong value)
         {
             stream.Write(BitConverter.GetBytes(value), 0, 8);
             return 8;
@@ -286,7 +326,7 @@ namespace OsmSharp.IO.Binary
             return 8;
         }
 
-        public static int Write(this Stream stream, bool? value)
+        private static int Write(this Stream stream, bool? value)
         {
             if (value == null)
             {
