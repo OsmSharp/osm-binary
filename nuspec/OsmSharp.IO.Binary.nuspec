@@ -15,7 +15,7 @@
         <copyright>Ben Abelshausen</copyright>
         <tags>osm, openstreetmap</tags>
         <dependencies>
-            <dependency id="OsmSharp" version="5.0.8" />
+            <dependency id="OsmSharp" version="6.0.0-pre04" />
         </dependencies>
     </metadata>
     <files>

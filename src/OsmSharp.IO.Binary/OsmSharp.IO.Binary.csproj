@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OsmSharp" Version="5.0.8" />
+    <PackageReference Include="OsmSharp" Version="6.0.0-pre04" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">

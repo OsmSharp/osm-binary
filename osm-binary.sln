@@ -30,6 +30,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{DE1A6CC0-4
 		docs\toc.yml = docs\toc.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuspec", "nuspec", "{D0DA1A16-EE3C-4B9B-A3E8-6F7BE999EDB6}"
+	ProjectSection(SolutionItems) = preProject
+		nuspec\OsmSharp.IO.Binary.nuspec = nuspec\OsmSharp.IO.Binary.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

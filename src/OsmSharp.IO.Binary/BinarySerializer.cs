@@ -204,8 +204,8 @@ namespace OsmSharp.IO.Binary
 
             stream.ReadOsmGeo(node, buffer);
 
-            node.Latitude = stream.ReadSingle(buffer);
-            node.Longitude = stream.ReadSingle(buffer);
+            node.Latitude = stream.ReadDouble(buffer);
+            node.Longitude = stream.ReadDouble(buffer);
 
             return node;
         }
@@ -306,6 +306,12 @@ namespace OsmSharp.IO.Binary
         {
             stream.Write(BitConverter.GetBytes(value), 0, 4);
             return 4;
+        }
+
+        private static int Write(this Stream stream, double value)
+        {
+            stream.Write(BitConverter.GetBytes(value), 0, 8);
+            return 8;
         }
 
         private static int Write(this Stream stream, long value)
@@ -411,6 +417,12 @@ namespace OsmSharp.IO.Binary
         {
             stream.Read(buffer, 0, 4);
             return BitConverter.ToSingle(buffer, 0);
+        }
+
+        private static double ReadDouble(this Stream stream, byte[] buffer)
+        {
+            stream.Read(buffer, 0, 8);
+            return BitConverter.ToDouble(buffer, 0);
         }
 
         private static string ReadWithSizeString(this System.IO.Stream stream, byte[] buffer)
