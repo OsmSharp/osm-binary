@@ -32,6 +32,24 @@ namespace OsmSharp.IO.Binary
     public static class BinarySerializer
     {
         private static System.Text.Encoder _encoder = (new System.Text.UnicodeEncoding()).GetEncoder();
+
+        /// <summary>
+        /// Appends the header byte(s).
+        /// </summary>
+        public static int AppendHeader(this Stream stream, OsmGeo osmGeo)
+        {
+            // build header containing type and nullable flags.
+            byte header = 1; // a node.
+            if (!osmGeo.Id.HasValue) { header = (byte)(header | 4); }
+            if (!osmGeo.ChangeSetId.HasValue) { header = (byte)(header | 8); }
+            if (!osmGeo.TimeStamp.HasValue) { header = (byte)(header | 16); }
+            if (!osmGeo.UserId.HasValue) { header = (byte)(header | 32); }
+            if (!osmGeo.Version.HasValue) { header = (byte)(header | 64); }
+            if (!osmGeo.Visible.HasValue) { header = (byte)(header | 128); }
+            stream.WriteByte(header);
+
+            return 1;
+        }
         
         /// <summary>
         /// Writes the given node starting at the stream's current position.
@@ -39,23 +57,21 @@ namespace OsmSharp.IO.Binary
         public static int Append(this Stream stream, Node node)
         {
             if (node == null) { throw new ArgumentNullException(nameof(node)); }
-            if (node.Id == null) { throw new ArgumentException("Object needs to have an id."); }
-            if (node.ChangeSetId == null) { throw new ArgumentException("Object needs to have an changeset id."); }
-            if (node.TimeStamp == null) { throw new ArgumentException("Object needs to have an timestamp."); }
-            if (node.Version == null) { throw new ArgumentException("Object needs to have a version #."); }
 
-            if (node.Latitude == null) { throw new ArgumentException("Object needs to have a latitude set."); }
-            if (node.Longitude == null) { throw new ArgumentException("Object needs to have a longitude set."); }
+            // appends the header.
+            var size = stream.AppendHeader(node);
 
-            var size = 0;
-
-            // write data.
-            stream.WriteByte((byte)1); // a node.
-            size += 1;
+            // write osm geo data.
             size += stream.AppendOsmGeo(node);
 
-            size += stream.Write(node.Latitude.Value);
-            size += stream.Write(node.Longitude.Value);
+            // write lat/lon with nullable flags.
+            byte header = 0;
+            if (!node.Latitude.HasValue) { header = (byte)(header | 1); }
+            if (!node.Longitude.HasValue) { header = (byte)(header | 2); }
+            size += 1;
+            stream.WriteByte(header);
+            if (node.Latitude.HasValue) { size += stream.Write(node.Latitude.Value); }
+            if (node.Longitude.HasValue) { size += stream.Write(node.Longitude.Value); }
 
             return size;
         }
@@ -66,10 +82,6 @@ namespace OsmSharp.IO.Binary
         public static int Append(this Stream stream, Way way)
         {
             if (way == null) { throw new ArgumentNullException(nameof(way)); }
-            if (way.Id == null) { throw new ArgumentException("Object needs to have an id."); }
-            if (way.ChangeSetId == null) { throw new ArgumentException("Object needs to have an changeset id."); }
-            if (way.TimeStamp == null) { throw new ArgumentException("Object needs to have an timestamp."); }
-            if (way.Version == null) { throw new ArgumentException("Object needs to have a version #."); }
 
             var size = 0;
 
@@ -101,10 +113,6 @@ namespace OsmSharp.IO.Binary
         public static int Append(this Stream stream, Relation relation)
         {
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
-            if (relation.Id == null) { throw new ArgumentException("Object needs to have an id."); }
-            if (relation.ChangeSetId == null) { throw new ArgumentException("Object needs to have an changeset id."); }
-            if (relation.TimeStamp == null) { throw new ArgumentException("Object needs to have an timestamp."); }
-            if (relation.Version == null) { throw new ArgumentException("Object needs to have a version #."); }
 
             var size = 0;
 
@@ -143,29 +151,27 @@ namespace OsmSharp.IO.Binary
 
             return size;
         }
-
+        
         private static int AppendOsmGeo(this Stream stream, OsmGeo osmGeo)
         {
             var size = 0;
 
-            size += stream.Write(osmGeo.Id.Value);
-            size += stream.Write(osmGeo.ChangeSetId.Value);
-            size += stream.Write(osmGeo.TimeStamp.Value.Ticks);
-            size += stream.Write(osmGeo.UserId.Value);
+            if (osmGeo.Id.HasValue) { size += stream.Write(osmGeo.Id.Value); }
+            if (osmGeo.ChangeSetId.HasValue) { size += stream.Write(osmGeo.ChangeSetId.Value); }
+            if (osmGeo.TimeStamp.HasValue) { size += stream.Write(osmGeo.TimeStamp.Value); }
+            if (osmGeo.UserId.HasValue) { size += stream.Write(osmGeo.UserId.Value); }
             size += stream.WriteWithSize(osmGeo.UserName);
-            size += stream.Write(osmGeo.Version.Value);
-            size += stream.Write(osmGeo.Visible);
-
+            if (osmGeo.Version.HasValue) { size += stream.Write(osmGeo.Version.Value); }
+            if (osmGeo.Visible.HasValue) { size += stream.Write(osmGeo.Visible.Value); }
+            
             if (osmGeo.Tags == null ||
                 osmGeo.Tags.Count == 0)
             {
-                stream.Write(0);
-                size++;
+                size += stream.Write(0);
             }
             else
             {
-                stream.Write(osmGeo.Tags.Count);
-                size++;
+                size += stream.Write(osmGeo.Tags.Count);
                 foreach (var t in osmGeo.Tags)
                 {
                     size += stream.WriteWithSize(t.Key);
@@ -175,37 +181,109 @@ namespace OsmSharp.IO.Binary
 
             return size;
         }
+
+        /// <summary>
+        /// Reads the header, returns the type, and outputs the flags.
+        /// </summary>
+        public static OsmGeoType ReadOsmGeoHeader(this Stream stream, out bool hasId, out bool hasChangesetId, out bool hasTimestamp,
+            out bool hasUserId, out bool hasVersion, out bool hasVisible)
+        {
+            var header = stream.ReadByte();
+
+            hasId = (header & 4) == 0;
+            hasChangesetId = (header & 8) == 0;
+            hasTimestamp = (header & 16) == 0;
+            hasUserId = (header & 32) == 0;
+            hasVersion = (header & 64) == 0;
+            hasVisible = (header & 128) == 0;
+
+            var type = header & 3;            
+            switch (header)
+            {
+                case 1:
+                    return OsmGeoType.Node;
+                case 2:
+                    return OsmGeoType.Way;
+                case 3:
+                    return OsmGeoType.Relation;
+            }
+            throw new Exception("Invalid header: cannot detect OsmGeoType.");
+        }
         
         /// <summary>
         /// Reads an OSM object starting at the stream's current position.
         /// </summary>
         public static OsmGeo ReadOsmGeo(this Stream stream, byte[] buffer)
         {
-            var type = stream.ReadByte();
-            if (type == -1)
+            bool hasId, hasChangesetId, hasTimestamp, hasUserId, hasVersion, hasVisible;
+            var type = stream.ReadOsmGeoHeader(out hasId, out hasChangesetId, out hasTimestamp, 
+                out hasUserId, out hasVersion, out hasVisible);
+
+            // read the basics.
+            long? id = null;
+            if (hasId) { id = stream.ReadInt64(buffer); }
+            long? changesetId = null;
+            if (hasChangesetId) { changesetId = stream.ReadInt64(buffer); }
+            DateTime? timestamp = null;
+            if (hasTimestamp) { timestamp = stream.ReadDateTime(buffer); }
+            long? userId = null;
+            if (hasUserId) { userId = stream.ReadInt64(buffer); }
+            var username = stream.ReadWithSizeString(buffer);
+            int? version = null;
+            if (hasVersion) { version = stream.ReadInt32(buffer); }
+            bool? visible = null;
+            if (hasVisible) { visible = stream.ReadBool(); }
+
+            // read tags.
+            var tagsCount = stream.ReadInt32(buffer);
+            TagsCollection tags = null;
+            if (tagsCount > 0)
             {
-                return null;
+                tags = new TagsCollection(tagsCount);
+                for (var i = 0; i < tagsCount; i++)
+                {
+                    var key = stream.ReadWithSizeString(buffer);
+                    var value = stream.ReadWithSizeString(buffer);
+                    tags.AddOrReplace(key, value);
+                }
             }
-            switch(type)
+
+            OsmGeo osmGeo = null;
+            switch (type)
             {
-                case 1:
-                    return stream.ReadNode(buffer);
-                case 2:
-                    return stream.ReadWay(buffer);
-                case 3:
-                    return stream.ReadRelation(buffer);
+                case OsmGeoType.Node:
+                    osmGeo = stream.ReadNode(buffer);
+                    break;
+                case OsmGeoType.Way:
+                    osmGeo = stream.ReadWay(buffer);
+                    break;
+                case OsmGeoType.Relation:
+                    osmGeo = stream.ReadRelation(buffer);
+                    break;
             }
-            throw new Exception(string.Format("Invalid type: {0}.", type));
+
+            osmGeo.Id = id;
+            osmGeo.ChangeSetId = changesetId;
+            osmGeo.TimeStamp = timestamp;
+            osmGeo.UserId = userId;
+            osmGeo.UserName = username;
+            osmGeo.Version = version;
+            osmGeo.Visible = visible;
+            osmGeo.Tags = tags;
+
+            return osmGeo;
         }
 
         private static Node ReadNode(this Stream stream, byte[] buffer)
         {
             var node = new Node();
 
-            stream.ReadOsmGeo(node, buffer);
+            var header = stream.ReadByte();
+            var hasLatitude = (header & 1) == 0;
+            var hasLongitude = (header & 2) == 0;
 
-            node.Latitude = stream.ReadDouble(buffer);
-            node.Longitude = stream.ReadDouble(buffer);
+            if (hasLatitude) { node.Latitude = stream.ReadDouble(buffer); }
+            if (hasLongitude) { node.Longitude = stream.ReadDouble(buffer); }
 
             return node;
         }
@@ -213,8 +291,6 @@ namespace OsmSharp.IO.Binary
         private static Way ReadWay(this Stream stream, byte[] buffer)
         {
             var way = new Way();
-
-            stream.ReadOsmGeo(way, buffer);
 
             var nodeCount = stream.ReadInt32(buffer);
             if (nodeCount > 0)
@@ -233,9 +309,7 @@ namespace OsmSharp.IO.Binary
         private static Relation ReadRelation(this Stream stream, byte[] buffer)
         {
             var relation = new Relation();
-
-            stream.ReadOsmGeo(relation, buffer);
-
+            
             var memberCount = stream.ReadInt32(buffer);
             if (memberCount > 0)
             {
@@ -268,30 +342,48 @@ namespace OsmSharp.IO.Binary
             return relation;
         }
 
-        private static void ReadOsmGeo(this Stream stream, OsmGeo osmGeo, byte[] buffer)
-        {
-            osmGeo.Id = stream.ReadInt64(buffer);
-            osmGeo.ChangeSetId = stream.ReadInt64(buffer);
-            osmGeo.TimeStamp = stream.ReadDateTime(buffer);
-            osmGeo.UserId = stream.ReadInt64(buffer);
-            osmGeo.UserName = stream.ReadWithSizeString(buffer);
-            osmGeo.Version = stream.ReadInt32(buffer);
-            osmGeo.Visible = stream.ReadBoolNullable();
+        //private static void ReadOsmGeo(this Stream stream, OsmGeo osmGeo, byte[] buffer)
+        //{
+        //    osmGeo.Id = stream.ReadNullable((s, b) => s.ReadInt64(b), buffer);
+        //    osmGeo.ChangeSetId = stream.ReadNullable((s, b) => s.ReadInt64(b), buffer);
+        //    osmGeo.TimeStamp = stream.ReadNullable((s, b) => s.ReadDateTime(b), buffer);
+        //    osmGeo.UserId = stream.ReadNullable((s, b) => s.ReadInt64(b), buffer);
+        //    osmGeo.UserName = stream.ReadWithSizeString(buffer);
+        //    osmGeo.Version = stream.ReadNullable((s, b) => s.ReadInt32(b), buffer);
+        //    osmGeo.Visible = stream.ReadBoolNullable();
 
-            var tagsSize = stream.ReadInt32(buffer);
-            if (tagsSize > 0)
-            {
-                var tags = new TagsCollection();
-                for (var t = 0; t < tagsSize; t++)
-                {
-                    var key = stream.ReadWithSizeString(buffer);
-                    var value = stream.ReadWithSizeString(buffer);
+        //    var tagsSize = stream.ReadInt32(buffer);
+        //    if (tagsSize > 0)
+        //    {
+        //        var tags = new TagsCollection();
+        //        for (var t = 0; t < tagsSize; t++)
+        //        {
+        //            var key = stream.ReadWithSizeString(buffer);
+        //            var value = stream.ReadWithSizeString(buffer);
 
-                    tags.Add(key, value);
-                }
-                osmGeo.Tags = tags;
-            }
-        }
+        //            tags.AddOrReplace(key, value);
+        //        }
+        //        osmGeo.Tags = tags;
+        //    }
+        //}
+
+        ///// <summary>
+        ///// Writes the given value to the stream.
+        ///// </summary>
+        //public static int WriteNullable<T>(this Stream stream, T? value, Func<Stream, T, int> write)
+        //    where T : struct
+        //{
+        //    if (write == null) { throw new ArgumentNullException("write"); }
+
+        //    if (value == null)
+        //    {
+        //        return 0;
+        //    }
+        //    else
+        //    {
+        //        return write(stream, value.Value);
+        //    }
+        //}
 
         /// <summary>
         /// Writes the given value to the stream.
@@ -332,21 +424,17 @@ namespace OsmSharp.IO.Binary
             return 8;
         }
 
-        private static int Write(this Stream stream, bool? value)
+        private static int Write(this Stream stream, bool value)
         {
-            if (value == null)
-            {
-                stream.WriteByte(0);
-            }
-            else if(value.Value)
+            if (value)
             {
                 stream.WriteByte(1);
             }
             else
             {
-                stream.WriteByte(2);
+                stream.WriteByte(0);
             }
-            return 4;
+            return 1;
         }
 
         private static int WriteWithSize(this Stream stream, string value)
@@ -375,6 +463,16 @@ namespace OsmSharp.IO.Binary
             }
         }
 
+        //private static T? ReadNullable<T>(this Stream stream, Func<Stream, byte[], T> read, byte[] buffer)
+        //    where T : struct
+        //{
+        //    if (stream.ReadByte() == 0)
+        //    {
+        //        return null;
+        //    }
+        //    return read(stream, buffer);
+        //}
+
         private static DateTime ReadDateTime(this Stream stream, byte[] buffer)
         {
             return new DateTime(stream.ReadInt64(buffer));
@@ -392,24 +490,41 @@ namespace OsmSharp.IO.Binary
             return BitConverter.ToInt32(buffer, 0);
         }
 
-        private static bool? ReadBoolNullable(this Stream stream)
+        //private static bool? ReadBoolNullable(this Stream stream)
+        //{
+        //    var v = stream.ReadByte();
+        //    if (v == 0)
+        //    {
+        //        return null;
+        //    }
+        //    else if (v == 1)
+        //    {
+        //        return true;
+        //    }
+        //    else if(v == 2)
+        //    {
+        //        return false;
+        //    }
+        //    else
+        //    {
+        //        throw new InvalidDataException("Cannot deserialize nullable bool.");
+        //    }
+        //}
+
+        private static bool ReadBool(this Stream stream)
         {
             var v = stream.ReadByte();
             if (v == 0)
             {
-                return null;
+                return false;
             }
             else if (v == 1)
             {
                 return true;
             }
-            else if(v == 2)
-            {
-                return false;
-            }
             else
             {
-                throw new InvalidDataException("Cannot deserialize nullable bool.");
+                throw new InvalidDataException("Cannot deserialize bool.");
             }
         }
 

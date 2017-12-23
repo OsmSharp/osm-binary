@@ -23,57 +23,47 @@ namespace OsmSharp.IO.Binary.Test
                 var node1 = new Node()
                 {
                     Id = 1,
-                    ChangeSetId = 1,
+                    ChangeSetId = 2,
                     Latitude = 10,
                     TimeStamp = DateTime.Now,
                     Longitude = 11,
                     Tags = new TagsCollection(new Tag("name", "hu?")),
-                    UserId = 1,
+                    UserId = 12,
                     UserName = "Ben",
-                    Version = 1,
+                    Version = 123,
                     Visible = true
                 };
 
                 // tests parameter checks.
                 node1.Id = null;
-                Assert.ThrowsException<ArgumentException>(() =>
-                {
-                    BinarySerializer.Append(stream, node1);
-                });
+                Assert.AreNotEqual(0, BinarySerializer.Append(stream, node1));
                 node1.Id = 1;
-                Assert.AreEqual(0, stream.Position);
+                Assert.AreNotEqual(0, stream.Position);
+                stream.Seek(0, SeekOrigin.Begin);
 
                 node1.Latitude = null;
-                Assert.ThrowsException<ArgumentException>(() =>
-                {
-                    BinarySerializer.Append(stream, node1);
-                });
+                Assert.AreNotEqual(0, BinarySerializer.Append(stream, node1));
                 node1.Latitude = 10;
-                Assert.AreEqual(0, stream.Position);
+                Assert.AreNotEqual(0, stream.Position);
+                stream.Seek(0, SeekOrigin.Begin);
 
                 node1.Longitude = null;
-                Assert.ThrowsException<ArgumentException>(() =>
-                {
-                    BinarySerializer.Append(stream, node1);
-                });
+                Assert.AreNotEqual(0, BinarySerializer.Append(stream, node1));
                 node1.Longitude = 10;
-                Assert.AreEqual(0, stream.Position);
+                Assert.AreNotEqual(0, stream.Position);
+                stream.Seek(0, SeekOrigin.Begin);
 
                 node1.TimeStamp = null;
-                Assert.ThrowsException<ArgumentException>(() =>
-                {
-                    BinarySerializer.Append(stream, node1);
-                });
+                Assert.AreNotEqual(0, BinarySerializer.Append(stream, node1));
                 node1.TimeStamp = DateTime.Now;
-                Assert.AreEqual(0, stream.Position);
+                Assert.AreNotEqual(0, stream.Position);
+                stream.Seek(0, SeekOrigin.Begin);
 
                 node1.ChangeSetId = null;
-                Assert.ThrowsException<ArgumentException>(() =>
-                {
-                    BinarySerializer.Append(stream, node1);
-                });
+                Assert.AreNotEqual(0, BinarySerializer.Append(stream, node1));
                 node1.ChangeSetId = 1;
-                Assert.AreEqual(0, stream.Position);
+                Assert.AreNotEqual(0, stream.Position);
+                stream.Seek(0, SeekOrigin.Begin);
 
                 // tests the actual serialization code.
                 BinarySerializer.Append(stream, node1);
@@ -126,28 +116,22 @@ namespace OsmSharp.IO.Binary.Test
 
                 // tests parameter checks.
                 way1.Id = null;
-                Assert.ThrowsException<ArgumentException>(() =>
-                {
-                    BinarySerializer.Append(stream, way1);
-                });
+                Assert.AreNotEqual(0, BinarySerializer.Append(stream, way1));
                 way1.Id = 1;
-                Assert.AreEqual(0, stream.Position);
+                Assert.AreNotEqual(0, stream.Position);
+                stream.Seek(0, SeekOrigin.Begin);
 
                 way1.TimeStamp = null;
-                Assert.ThrowsException<ArgumentException>(() =>
-                {
-                    BinarySerializer.Append(stream, way1);
-                });
+                Assert.AreNotEqual(0, BinarySerializer.Append(stream, way1));
                 way1.TimeStamp = DateTime.Now;
-                Assert.AreEqual(0, stream.Position);
+                Assert.AreNotEqual(0, stream.Position);
+                stream.Seek(0, SeekOrigin.Begin);
 
                 way1.ChangeSetId = null;
-                Assert.ThrowsException<ArgumentException>(() =>
-                {
-                    BinarySerializer.Append(stream, way1);
-                });
+                Assert.AreNotEqual(0, BinarySerializer.Append(stream, way1));
                 way1.ChangeSetId = 1;
-                Assert.AreEqual(0, stream.Position);
+                Assert.AreNotEqual(0, stream.Position);
+                stream.Seek(0, SeekOrigin.Begin);
 
                 // tests the actual serialization code.
                 BinarySerializer.Append(stream, way1);
@@ -215,28 +199,22 @@ namespace OsmSharp.IO.Binary.Test
 
                 // tests parameter checks.
                 relation1.Id = null;
-                Assert.ThrowsException<ArgumentException>(() =>
-                {
-                    BinarySerializer.Append(stream, relation1);
-                });
+                Assert.AreNotEqual(0, BinarySerializer.Append(stream, relation1));
                 relation1.Id = 1;
-                Assert.AreEqual(0, stream.Position);
+                Assert.AreNotEqual(0, stream.Position);
+                stream.Seek(0, SeekOrigin.Begin);
 
                 relation1.TimeStamp = null;
-                Assert.ThrowsException<ArgumentException>(() =>
-                {
-                    BinarySerializer.Append(stream, relation1);
-                });
+                Assert.AreNotEqual(0, BinarySerializer.Append(stream, relation1));
                 relation1.TimeStamp = DateTime.Now;
-                Assert.AreEqual(0, stream.Position);
+                Assert.AreNotEqual(0, stream.Position);
+                stream.Seek(0, SeekOrigin.Begin);
 
                 relation1.ChangeSetId = null;
-                Assert.ThrowsException<ArgumentException>(() =>
-                {
-                    BinarySerializer.Append(stream, relation1);
-                });
+                Assert.AreNotEqual(0, BinarySerializer.Append(stream, relation1));
                 relation1.ChangeSetId = 1;
-                Assert.AreEqual(0, stream.Position);
+                Assert.AreNotEqual(0, stream.Position);
+                stream.Seek(0, SeekOrigin.Begin);
 
                 // tests the actual serialization code.
                 BinarySerializer.Append(stream, relation1);
