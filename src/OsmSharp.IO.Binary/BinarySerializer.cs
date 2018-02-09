@@ -189,6 +189,10 @@ namespace OsmSharp.IO.Binary
             out bool hasUserId, out bool hasVersion, out bool hasVisible)
         {
             var header = stream.ReadByte();
+            if (header == -1)
+            {
+                throw new Exception("Unexpected end of stream, check if stream has ended before attempting to read header.");
+            }
 
             hasId = (header & 4) == 0;
             hasChangesetId = (header & 8) == 0;
@@ -215,6 +219,11 @@ namespace OsmSharp.IO.Binary
         /// </summary>
         public static OsmGeo ReadOsmGeo(this Stream stream, byte[] buffer)
         {
+            if (stream.Length == stream.Position)
+            {
+                return null;
+            }
+
             bool hasId, hasChangesetId, hasTimestamp, hasUserId, hasVersion, hasVisible;
             var type = stream.ReadOsmGeoHeader(out hasId, out hasChangesetId, out hasTimestamp, 
                 out hasUserId, out hasVersion, out hasVisible);

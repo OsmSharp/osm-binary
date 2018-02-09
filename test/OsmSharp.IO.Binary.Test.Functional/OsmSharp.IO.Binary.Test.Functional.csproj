@@ -10,8 +10,4 @@
     <ProjectReference Include="..\..\src\OsmSharp.IO.Binary\OsmSharp.IO.Binary.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="OsmSharp" Version="6.0.0-pre04" />
-  </ItemGroup>
-
 </Project>
