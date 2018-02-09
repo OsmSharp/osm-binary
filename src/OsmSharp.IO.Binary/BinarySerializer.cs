@@ -40,6 +40,14 @@ namespace OsmSharp.IO.Binary
         {
             // build header containing type and nullable flags.
             byte header = 1; // a node.
+            if(osmGeo.Type == OsmGeoType.Way)
+            {
+                header = 2;
+            }
+            else if(osmGeo.Type == OsmGeoType.Relation)
+            {
+                header = 3;
+            }
             if (!osmGeo.Id.HasValue) { header = (byte)(header | 4); }
             if (!osmGeo.ChangeSetId.HasValue) { header = (byte)(header | 8); }
             if (!osmGeo.TimeStamp.HasValue) { header = (byte)(header | 16); }
@@ -83,11 +91,10 @@ namespace OsmSharp.IO.Binary
         {
             if (way == null) { throw new ArgumentNullException(nameof(way)); }
 
-            var size = 0;
+            // appends the header.
+            var size = stream.AppendHeader(way);
 
             // write data.
-            stream.WriteByte((byte)2); // a way.
-            size += 1;
             size += stream.AppendOsmGeo(way);
             
             if (way.Nodes == null ||
@@ -114,11 +121,10 @@ namespace OsmSharp.IO.Binary
         {
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
 
-            var size = 0;
+            // appends the header.
+            var size = stream.AppendHeader(relation);
 
             // write data.
-            stream.WriteByte((byte)3); // a relation.
-            size += 1;
             size += stream.AppendOsmGeo(relation);
             
             if (relation.Members == null ||
@@ -202,7 +208,7 @@ namespace OsmSharp.IO.Binary
             hasVisible = (header & 128) == 0;
 
             var type = header & 3;            
-            switch (header)
+            switch (type)
             {
                 case 1:
                     return OsmGeoType.Node;
@@ -351,49 +357,6 @@ namespace OsmSharp.IO.Binary
             return relation;
         }
 
-        //private static void ReadOsmGeo(this Stream stream, OsmGeo osmGeo, byte[] buffer)
-        //{
-        //    osmGeo.Id = stream.ReadNullable((s, b) => s.ReadInt64(b), buffer);
-        //    osmGeo.ChangeSetId = stream.ReadNullable((s, b) => s.ReadInt64(b), buffer);
-        //    osmGeo.TimeStamp = stream.ReadNullable((s, b) => s.ReadDateTime(b), buffer);
-        //    osmGeo.UserId = stream.ReadNullable((s, b) => s.ReadInt64(b), buffer);
-        //    osmGeo.UserName = stream.ReadWithSizeString(buffer);
-        //    osmGeo.Version = stream.ReadNullable((s, b) => s.ReadInt32(b), buffer);
-        //    osmGeo.Visible = stream.ReadBoolNullable();
-
-        //    var tagsSize = stream.ReadInt32(buffer);
-        //    if (tagsSize > 0)
-        //    {
-        //        var tags = new TagsCollection();
-        //        for (var t = 0; t < tagsSize; t++)
-        //        {
-        //            var key = stream.ReadWithSizeString(buffer);
-        //            var value = stream.ReadWithSizeString(buffer);
-
-        //            tags.AddOrReplace(key, value);
-        //        }
-        //        osmGeo.Tags = tags;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Writes the given value to the stream.
-        ///// </summary>
-        //public static int WriteNullable<T>(this Stream stream, T? value, Func<Stream, T, int> write)
-        //    where T : struct
-        //{
-        //    if (write == null) { throw new ArgumentNullException("write"); }
-
-        //    if (value == null)
-        //    {
-        //        return 0;
-        //    }
-        //    else
-        //    {
-        //        return write(stream, value.Value);
-        //    }
-        //}
-
         /// <summary>
         /// Writes the given value to the stream.
         /// </summary>
@@ -472,16 +435,6 @@ namespace OsmSharp.IO.Binary
             }
         }
 
-        //private static T? ReadNullable<T>(this Stream stream, Func<Stream, byte[], T> read, byte[] buffer)
-        //    where T : struct
-        //{
-        //    if (stream.ReadByte() == 0)
-        //    {
-        //        return null;
-        //    }
-        //    return read(stream, buffer);
-        //}
-
         private static DateTime ReadDateTime(this Stream stream, byte[] buffer)
         {
             return new DateTime(stream.ReadInt64(buffer));
@@ -498,27 +451,6 @@ namespace OsmSharp.IO.Binary
             stream.Read(buffer, 0, 4);
             return BitConverter.ToInt32(buffer, 0);
         }
-
-        //private static bool? ReadBoolNullable(this Stream stream)
-        //{
-        //    var v = stream.ReadByte();
-        //    if (v == 0)
-        //    {
-        //        return null;
-        //    }
-        //    else if (v == 1)
-        //    {
-        //        return true;
-        //    }
-        //    else if(v == 2)
-        //    {
-        //        return false;
-        //    }
-        //    else
-        //    {
-        //        throw new InvalidDataException("Cannot deserialize nullable bool.");
-        //    }
-        //}
 
         private static bool ReadBool(this Stream stream)
         {
