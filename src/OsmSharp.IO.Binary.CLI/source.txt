@@ -1,0 +1,1 @@
+Program.cs(24,25): error CS0266: Cannot implicitly convert type 'bool?' to 'bool'. An explicit conversion exists (are you missing a cast?) [/home/xivk/work/osmsharp/osm-binary/src/OsmSharp.IO.Binary.CLI/OsmSharp.IO.Binary.CLI.csproj]
