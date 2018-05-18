@@ -36,6 +36,7 @@ TestResults*/
 *.osm.bin
 TestResult.xml
 .vs*/
+.idea*/
 project.lock.json
 
 packages/*
