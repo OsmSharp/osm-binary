@@ -44,3 +44,10 @@ packages/*
 docs/obj/*
 docs/api/*
 docs/_site/*
+
+src/OsmSharp.IO.Binary.CLI/**/*.osm
+src/OsmSharp.IO.Binary.CLI/**/*.db
+src/OsmSharp.IO.Binary.CLI/**/*.hash
+src/OsmSharp.IO.Binary.CLI/**/*.osc
+
+.idea*/

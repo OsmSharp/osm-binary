@@ -35,6 +35,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuspec", "nuspec", "{D0DA1A
 		nuspec\OsmSharp.IO.Binary.nuspec = nuspec\OsmSharp.IO.Binary.nuspec
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OsmSharp.IO.Binary.CLI", "src\OsmSharp.IO.Binary.CLI\OsmSharp.IO.Binary.CLI.csproj", "{7F56369C-04B0-40D7-B9D4-365ACCCB8854}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,18 @@ Global
 		{42101E84-7B0B-453D-846F-917F92AFD2B5}.Release|x64.Build.0 = Release|Any CPU
 		{42101E84-7B0B-453D-846F-917F92AFD2B5}.Release|x86.ActiveCfg = Release|Any CPU
 		{42101E84-7B0B-453D-846F-917F92AFD2B5}.Release|x86.Build.0 = Release|Any CPU
+		{7F56369C-04B0-40D7-B9D4-365ACCCB8854}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F56369C-04B0-40D7-B9D4-365ACCCB8854}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F56369C-04B0-40D7-B9D4-365ACCCB8854}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7F56369C-04B0-40D7-B9D4-365ACCCB8854}.Debug|x64.Build.0 = Debug|Any CPU
+		{7F56369C-04B0-40D7-B9D4-365ACCCB8854}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7F56369C-04B0-40D7-B9D4-365ACCCB8854}.Debug|x86.Build.0 = Debug|Any CPU
+		{7F56369C-04B0-40D7-B9D4-365ACCCB8854}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F56369C-04B0-40D7-B9D4-365ACCCB8854}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F56369C-04B0-40D7-B9D4-365ACCCB8854}.Release|x64.ActiveCfg = Release|Any CPU
+		{7F56369C-04B0-40D7-B9D4-365ACCCB8854}.Release|x64.Build.0 = Release|Any CPU
+		{7F56369C-04B0-40D7-B9D4-365ACCCB8854}.Release|x86.ActiveCfg = Release|Any CPU
+		{7F56369C-04B0-40D7-B9D4-365ACCCB8854}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -89,6 +103,7 @@ Global
 		{6F0A4070-4C08-4606-8FAB-616AAFC3B7E8} = {F1A61D93-95DF-4D12-AFDE-C8D41CA92027}
 		{59E798D4-82A0-43DA-B236-3B7276C185A7} = {404E00F6-40C2-4EC6-913A-9AA5E382F47D}
 		{42101E84-7B0B-453D-846F-917F92AFD2B5} = {404E00F6-40C2-4EC6-913A-9AA5E382F47D}
+		{7F56369C-04B0-40D7-B9D4-365ACCCB8854} = {F1A61D93-95DF-4D12-AFDE-C8D41CA92027}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0E22A33-27E9-4E55-BFD8-1F91C4AB31BF}
