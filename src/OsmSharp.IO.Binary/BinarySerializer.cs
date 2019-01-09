@@ -23,6 +23,7 @@
 using OsmSharp.Tags;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace OsmSharp.IO.Binary
 {
@@ -191,13 +192,21 @@ namespace OsmSharp.IO.Binary
         /// <summary>
         /// Reads the header, returns the type, and outputs the flags.
         /// </summary>
-        public static OsmGeoType ReadOsmGeoHeader(this Stream stream, out bool hasId, out bool hasChangesetId, out bool hasTimestamp,
+        public static bool TryReadOsmGeoHeader(this Stream stream, out OsmGeoType type, out bool hasId, out bool hasChangesetId, out bool hasTimestamp,
             out bool hasUserId, out bool hasVersion, out bool hasVisible)
         {
             var header = stream.ReadByte();
             if (header == -1)
             {
-                throw new Exception("Unexpected end of stream, check if stream has ended before attempting to read header.");
+                hasId = false;
+                hasVersion = false;
+                hasChangesetId = false;
+                hasTimestamp = false;
+                hasUserId = false;
+                hasVersion = false;
+                hasVisible = false;
+                type = OsmGeoType.Node;
+                return false;
             }
 
             hasId = (header & 4) == 0;
@@ -207,17 +216,23 @@ namespace OsmSharp.IO.Binary
             hasVersion = (header & 64) == 0;
             hasVisible = (header & 128) == 0;
 
-            var type = header & 3;            
-            switch (type)
+            var typeNumber = header & 3;            
+            switch (typeNumber)
             {
                 case 1:
-                    return OsmGeoType.Node;
+                    type = OsmGeoType.Node;
+                    break;
                 case 2:
-                    return OsmGeoType.Way;
+                    type = OsmGeoType.Way;
+                    break;
                 case 3:
-                    return OsmGeoType.Relation;
+                    type = OsmGeoType.Relation;
+                    break;
+                default:
+                    throw new Exception("Invalid header: cannot detect OsmGeoType.");
             }
-            throw new Exception("Invalid header: cannot detect OsmGeoType.");
+
+            return true;
         }
         
         /// <summary>
@@ -225,14 +240,17 @@ namespace OsmSharp.IO.Binary
         /// </summary>
         public static OsmGeo ReadOsmGeo(this Stream stream, byte[] buffer)
         {
-            if (stream.Length == stream.Position)
+            if (stream.CanSeek &&
+                stream.Length == stream.Position)
             {
                 return null;
             }
 
-            bool hasId, hasChangesetId, hasTimestamp, hasUserId, hasVersion, hasVisible;
-            var type = stream.ReadOsmGeoHeader(out hasId, out hasChangesetId, out hasTimestamp, 
-                out hasUserId, out hasVersion, out hasVisible);
+            if (!stream.TryReadOsmGeoHeader(out var type, out var hasId, out var hasChangesetId, out var hasTimestamp,
+                out var hasUserId, out var hasVersion, out var hasVisible))
+            { // couldn't read header.
+                return null;
+            }
 
             // read the basics.
             long? id = null;
@@ -273,6 +291,7 @@ namespace OsmSharp.IO.Binary
                     osmGeo = stream.ReadWay(buffer);
                     break;
                 case OsmGeoType.Relation:
+                default:
                     osmGeo = stream.ReadRelation(buffer);
                     break;
             }
@@ -442,7 +461,7 @@ namespace OsmSharp.IO.Binary
 
         private static long ReadInt64(this Stream stream, byte[] buffer)
         {
-            stream.Read(buffer, 0, 8);
+            var c = stream.Read(buffer, 0, 8);
             return BitConverter.ToInt64(buffer, 0);
         }
 

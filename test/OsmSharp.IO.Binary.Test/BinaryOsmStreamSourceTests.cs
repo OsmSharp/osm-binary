@@ -20,9 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OsmSharp.Streams;
+using OsmSharp.Tags;
 
 namespace OsmSharp.IO.Binary.Test
 {
@@ -33,7 +37,7 @@ namespace OsmSharp.IO.Binary.Test
     public class BinaryOsmStreamSourceTests
     {
         [TestMethod]
-        public void BinaryOsmStream_ShouldReadNode()
+        public void BinaryOsmStreamSource_ShouldReadNode()
         {
             using (var stream = Staging.TestStreams.GetNodeTestStream())
             {
@@ -45,7 +49,7 @@ namespace OsmSharp.IO.Binary.Test
         }
         
         [TestMethod]
-        public void BinaryOsmStream_ShouldReadWay()
+        public void BinaryOsmStreamSource_ShouldReadWay()
         {
             using (var stream = Staging.TestStreams.GetWayTestStream())
             {
@@ -57,7 +61,7 @@ namespace OsmSharp.IO.Binary.Test
         }
         
         [TestMethod]
-        public void BinaryOsmStream_ShouldReadRelation()
+        public void BinaryOsmStreamSource_ShouldReadRelation()
         {
             using (var stream = Staging.TestStreams.GetRelationTestStream())
             {
@@ -69,7 +73,7 @@ namespace OsmSharp.IO.Binary.Test
         }
         
         [TestMethod]
-        public void BinaryOsmStream_ShouldReadNodeWayAndRelation()
+        public void BinaryOsmStreamSource_ShouldReadNodeWayAndRelation()
         {
             using (var stream = Staging.TestStreams.GetNodeWayAndRelationTestStream())
             {
@@ -84,7 +88,7 @@ namespace OsmSharp.IO.Binary.Test
         }
         
         [TestMethod]
-        public void BinaryOsmStream_ShouldIgnoreNode()
+        public void BinaryOsmStreamSource_ShouldIgnoreNode()
         {
             using (var stream = Staging.TestStreams.GetNodeWayAndRelationTestStream())
             {
@@ -101,7 +105,7 @@ namespace OsmSharp.IO.Binary.Test
         }
         
         [TestMethod]
-        public void BinaryOsmStream_ShouldIgnoreWay()
+        public void BinaryOsmStreamSource_ShouldIgnoreWay()
         {
             using (var stream = Staging.TestStreams.GetNodeWayAndRelationTestStream())
             {
@@ -118,7 +122,7 @@ namespace OsmSharp.IO.Binary.Test
         }
         
         [TestMethod]
-        public void BinaryOsmStream_ShouldIgnoreRelation()
+        public void BinaryOsmStreamSource_ShouldIgnoreRelation()
         {
             using (var stream = Staging.TestStreams.GetNodeWayAndRelationTestStream())
             {
@@ -131,6 +135,60 @@ namespace OsmSharp.IO.Binary.Test
                 Assert.AreEqual(2, osmGeos.Count);
                 Assert.IsInstanceOfType(osmGeos[0], typeof(Node));
                 Assert.IsInstanceOfType(osmGeos[1], typeof(Way));
+            }
+        }
+        
+        [TestMethod]
+        public void BinaryOsmStreamSource_ShouldReadFomDeflateStream()
+        {
+            using (var stream = new MemoryStream())
+            {
+                using (var streamCompressed = new DeflateStream(stream, CompressionMode.Compress, true))
+                {
+                    var targetStream = new BinaryOsmStreamTarget(streamCompressed);
+                    targetStream.Initialize();
+                    targetStream.AddRelation(new Relation()
+                    {
+                        Id = 1,
+                        ChangeSetId = 1,
+                        TimeStamp = DateTime.Now,
+                        Tags = new TagsCollection(new Tag("name", "hu?")),
+                        Members = new RelationMember[]
+                        {
+                            new RelationMember()
+                            {
+                                Id = 1,
+                                Role = "node",
+                                Type = OsmGeoType.Node
+                            },
+                            new RelationMember()
+                            {
+                                Id = 2,
+                                Role = "way",
+                                Type = OsmGeoType.Way
+                            },
+                            new RelationMember()
+                            {
+                                Id = 3,
+                                Role = "relation",
+                                Type = OsmGeoType.Relation
+                            }
+                        },
+                        UserId = 1,
+                        UserName = "Ben",
+                        Version = 1,
+                        Visible = true
+                    });
+                }
+
+                stream.Seek(0, SeekOrigin.Begin);
+                using (var streamCompressed = new DeflateStream(stream, CompressionMode.Decompress))
+                {
+                    var sourceStream = new BinaryOsmStreamSource(streamCompressed);
+                    var osmGeos = sourceStream.ToList();
+                
+                    Assert.AreEqual(1, osmGeos.Count);
+                }
             }
         }
     }

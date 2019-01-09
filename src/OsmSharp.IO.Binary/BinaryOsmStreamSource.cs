@@ -71,29 +71,32 @@ namespace OsmSharp.Streams
         /// </summary>
         public override bool MoveNext(bool ignoreNodes, bool ignoreWays, bool ignoreRelations)
         {
-            if (_stream.Length == _stream.Position + 1)
+            if (_stream.CanSeek)
             {
-                return false;
-            }
-
-            // move to first way/relation position if they are known and nodes and or ways are to be skipped.
-            if (_firstWayPosition != null && ignoreNodes && !ignoreWays)
-            {
-                // if nodes have to be ignored, there was already a first pass and ways are not to be ignored jump to the first way.
-                if (_stream.Position <= _firstWayPosition)
+                if (_stream.Length == _stream.Position + 1)
                 {
-                    // only just to the first way if that hasn't happened yet.
-                    _stream.Seek(_firstWayPosition.Value, SeekOrigin.Begin);
+                    return false;
                 }
-            }
 
-            if (_firstRelationPosition != null && ignoreNodes && ignoreWays && !ignoreRelations)
-            {
-                // if nodes and ways have to be ignored, there was already a first pass and ways are not be ignored jump to the first relation.
-                if (_stream.Position < _firstRelationPosition)
+                // move to first way/relation position if they are known and nodes and or ways are to be skipped.
+                if (_firstWayPosition != null && ignoreNodes && !ignoreWays)
                 {
-                    // only just to the first relation if that hasn't happened yet.
-                    _stream.Seek(_firstRelationPosition.Value, SeekOrigin.Begin);
+                    // if nodes have to be ignored, there was already a first pass and ways are not to be ignored jump to the first way.
+                    if (_stream.Position <= _firstWayPosition)
+                    {
+                        // only just to the first way if that hasn't happened yet.
+                        _stream.Seek(_firstWayPosition.Value, SeekOrigin.Begin);
+                    }
+                }
+
+                if (_firstRelationPosition != null && ignoreNodes && ignoreWays && !ignoreRelations)
+                {
+                    // if nodes and ways have to be ignored, there was already a first pass and ways are not be ignored jump to the first relation.
+                    if (_stream.Position < _firstRelationPosition)
+                    {
+                        // only just to the first relation if that hasn't happened yet.
+                        _stream.Seek(_firstRelationPosition.Value, SeekOrigin.Begin);
+                    }
                 }
             }
 
