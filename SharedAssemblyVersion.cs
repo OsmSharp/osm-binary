@@ -19,5 +19,5 @@
 using System.Reflection;
 
 // update the version # here.
-[assembly: AssemblyInformationalVersion("0.0.15-alpha")]
-[assembly: AssemblyVersion("0.0.15")] 
+[assembly: AssemblyInformationalVersion("0.0.16-alpha")]
+[assembly: AssemblyVersion("0.0.16")] 

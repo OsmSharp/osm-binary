@@ -52,3 +52,7 @@ src/OsmSharp.IO.Binary.CLI/**/*.hash
 src/OsmSharp.IO.Binary.CLI/**/*.osc
 
 .idea*/
+
+
+**/logs/*
+**/*.bin.zip
