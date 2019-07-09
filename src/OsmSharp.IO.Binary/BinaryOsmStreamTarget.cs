@@ -66,6 +66,22 @@ namespace OsmSharp.Streams
         {
             _stream.Append(way);
         }
+        
+        /// <summary>
+        /// Flushes data in this stream.
+        /// </summary>
+        public override void Flush()
+        {
+            _stream.Flush();
+        }
+
+        /// <summary>
+        /// Closes this target.
+        /// </summary>
+        public override void Close()
+        {
+            this.Flush();
+        }
 
         /// <summary>
         /// Initializes this target.
