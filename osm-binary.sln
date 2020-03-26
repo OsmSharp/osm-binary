@@ -15,12 +15,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BA73FDB9-8E6B-4F68-A8B4-F92E60C7EE67}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		build.bat = build.bat
-		build.sh = build.sh
-		INDEX.md = INDEX.md
 		LICENSE.md = LICENSE.md
 		README.md = README.md
-		SharedAssemblyVersion.cs = SharedAssemblyVersion.cs
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{DE1A6CC0-47AE-48F5-ACE3-0873E1E3523B}"
@@ -28,11 +24,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{DE1A6CC0-4
 		docs\docfx.json = docs\docfx.json
 		docs\INDEX.md = docs\INDEX.md
 		docs\toc.yml = docs\toc.yml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuspec", "nuspec", "{D0DA1A16-EE3C-4B9B-A3E8-6F7BE999EDB6}"
-	ProjectSection(SolutionItems) = preProject
-		nuspec\OsmSharp.IO.Binary.nuspec = nuspec\OsmSharp.IO.Binary.nuspec
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OsmSharp.IO.Binary.CLI", "src\OsmSharp.IO.Binary.CLI\OsmSharp.IO.Binary.CLI.csproj", "{C6E916E4-FFD0-41C4-B29E-89F3249F636E}"
