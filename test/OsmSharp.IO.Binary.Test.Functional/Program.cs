@@ -102,7 +102,7 @@ namespace OsmSharp.IO.Binary.Test.Functional
             }
 
             using (var sourceStream = File.OpenRead("test3.osm.bin"))
-            using (var targetStream = File.Open("test2.osm.pbf", FileMode.Create))
+            using (var targetStream = File.Open("test3.osm.pbf", FileMode.Create))
             {
                 var source = new OsmSharp.Streams.BinaryOsmStreamSource(sourceStream);
 
@@ -110,6 +110,28 @@ namespace OsmSharp.IO.Binary.Test.Functional
                 target.RegisterSource(source);
                 target.Pull();
             }
+
+            Log.Information("Testing reading/writing via OSM binary format of edited incomplete binary OSM data...");
+            using (var sourceStream = File.OpenRead("./test-data/data.osm.bin"))
+            using (var targetStream = File.Open("test4.osm.bin", FileMode.Create))
+            {
+                var source = new OsmSharp.Streams.BinaryOsmStreamSource(sourceStream);
+
+                var target = new OsmSharp.Streams.BinaryOsmStreamTarget(targetStream);
+                target.RegisterSource(source);
+                target.Pull();
+            }
+
+            using (var sourceStream = File.OpenRead("test4.osm.bin"))
+            using (var targetStream = File.Open("test4.osm.pbf", FileMode.Create))
+            {
+                var source = new OsmSharp.Streams.BinaryOsmStreamSource(sourceStream);
+
+                var target = new OsmSharp.Streams.PBFOsmStreamTarget(targetStream);
+                target.RegisterSource(source);
+                target.Pull();
+            }
+
         }
     }
 }

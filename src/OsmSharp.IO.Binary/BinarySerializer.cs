@@ -168,7 +168,7 @@ namespace OsmSharp.IO.Binary
             if (osmGeo.TimeStamp.HasValue) { size += stream.Write(osmGeo.TimeStamp.Value); }
             if (osmGeo.UserId.HasValue) { size += stream.Write(osmGeo.UserId.Value); }
             size += stream.WriteWithSize(osmGeo.UserName);
-            if (osmGeo.Version.HasValue) { size += stream.Write(osmGeo.Version.Value); }
+            if (osmGeo.Version.HasValue) { size += stream.Write((int)osmGeo.Version.Value); }
             if (osmGeo.Visible.HasValue) { size += stream.Write(osmGeo.Visible.Value); }
             
             if (osmGeo.Tags == null ||
