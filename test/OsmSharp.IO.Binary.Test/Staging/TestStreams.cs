@@ -4,12 +4,35 @@ using OsmSharp.Tags;
 
 namespace OsmSharp.IO.Binary.Test.Staging
 {
-    public static class TestStreams
+    internal static class TestStreams
     {
-        /// <summary>
-        /// Creates a test stream with a single node.
-        /// </summary>
-        /// <returns></returns>
+        
+        public static Stream GetAllRegressionStream()
+        {
+            return TestStreams.LoadAsStream("OsmSharp.IO.Binary.Test.test_data.all.osm.bin");
+        }
+        
+        public static Stream GetNodeRegressionStream()
+        {
+            return TestStreams.LoadAsStream("OsmSharp.IO.Binary.Test.test_data.node.osm.bin");
+        }
+        
+        public static Stream GetWayRegressionStream()
+        {
+            return TestStreams.LoadAsStream("OsmSharp.IO.Binary.Test.test_data.way.osm.bin");
+        }
+        
+        public static Stream GetRelationRegressionStream()
+        {
+            return TestStreams.LoadAsStream("OsmSharp.IO.Binary.Test.test_data.relation.osm.bin");
+        }
+        
+        public static Stream LoadAsStream(string path)
+        {
+            return System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(
+                path);
+        }
+        
         public static Stream GetNodeTestStream()
         {
             var stream = new MemoryStream();
@@ -33,10 +56,6 @@ namespace OsmSharp.IO.Binary.Test.Staging
             return stream;
         }
         
-        /// <summary>
-        /// Creates a test stream with a single way.
-        /// </summary>
-        /// <returns></returns>
         public static Stream GetWayTestStream()
         {
             var stream = new MemoryStream();
@@ -64,10 +83,6 @@ namespace OsmSharp.IO.Binary.Test.Staging
             return stream;
         }
         
-        /// <summary>
-        /// Creates a test stream with a single relation.
-        /// </summary>
-        /// <returns></returns>
         public static Stream GetRelationTestStream()
         {
             var stream = new MemoryStream();
@@ -110,10 +125,6 @@ namespace OsmSharp.IO.Binary.Test.Staging
             return stream;
         }
         
-        /// <summary>
-        /// Creates a test stream with a single node, way and relation.
-        /// </summary>
-        /// <returns></returns>
         public static Stream GetNodeWayAndRelationTestStream()
         {
             var stream = new MemoryStream();
