@@ -238,19 +238,16 @@ namespace OsmSharp.IO.Binary
         /// <summary>
         /// Reads an OSM object starting at the stream's current position.
         /// </summary>
-        public static OsmGeo ReadOsmGeo(this Stream stream, byte[] buffer)
+        public static OsmGeo ReadOsmGeo(this Stream stream, byte[] buffer = null)
         {
             if (stream.CanSeek &&
-                stream.Length == stream.Position)
-            {
-                return null;
-            }
+                stream.Length == stream.Position) return null;
 
             if (!stream.TryReadOsmGeoHeader(out var type, out var hasId, out var hasChangesetId, out var hasTimestamp,
-                out var hasUserId, out var hasVersion, out var hasVisible))
-            { // couldn't read header.
-                return null;
-            }
+                out var hasUserId, out var hasVersion, out var hasVisible)) return null; // couldn't read header.
+            
+            buffer ??= new byte [1024];
+            if (buffer.Length < 1024) throw new ArgumentException("Buffer needs be at least 1024 bytes.", nameof(buffer));
 
             // read the basics.
             long? id = null;
@@ -281,7 +278,7 @@ namespace OsmSharp.IO.Binary
                 }
             }
 
-            OsmGeo osmGeo = null;
+            OsmGeo osmGeo;
             switch (type)
             {
                 case OsmGeoType.Node:
@@ -290,7 +287,6 @@ namespace OsmSharp.IO.Binary
                 case OsmGeoType.Way:
                     osmGeo = stream.ReadWay(buffer);
                     break;
-                case OsmGeoType.Relation:
                 default:
                     osmGeo = stream.ReadRelation(buffer);
                     break;
