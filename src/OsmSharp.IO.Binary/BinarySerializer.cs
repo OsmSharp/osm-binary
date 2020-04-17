@@ -158,8 +158,22 @@ namespace OsmSharp.IO.Binary
 
             return size;
         }
+
+        /// <summary>
+        /// Writes the given osm geo object starting at the stream's current position.
+        /// </summary>
+        public static int Append(this Stream stream, OsmGeo osmGeo)
+        {
+            return osmGeo switch
+            {
+                Node node => stream.Append(node),
+                Way way => stream.Append(way),
+                Relation relation => stream.Append(relation),
+                _ => throw new InvalidDataException($"Unknown {nameof(OsmGeo)} type.")
+            };
+        }
         
-        private static int AppendOsmGeo(this Stream stream, OsmGeo osmGeo)
+        public static int AppendOsmGeo(this Stream stream, OsmGeo osmGeo)
         {
             var size = 0;
 
