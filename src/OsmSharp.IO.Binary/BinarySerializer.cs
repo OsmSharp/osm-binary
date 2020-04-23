@@ -24,6 +24,7 @@ using OsmSharp.Tags;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using OsmSharp.Db;
 
 namespace OsmSharp.IO.Binary
 {
@@ -247,6 +248,30 @@ namespace OsmSharp.IO.Binary
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Reads only the OSM type and id for the current object.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="buffer">The buffer.</param>
+        /// <returns>The id and type.</returns>
+        public static (OsmGeoType type, long? id) ReadOsmGeoKey(this Stream stream, byte[] buffer = null)
+        {            
+            if (stream.CanSeek &&
+                         stream.Length == stream.Position) throw new InvalidDataException("Could not read header.");;
+
+            if (!stream.TryReadOsmGeoHeader(out var type, out var hasId, out var _, out var _,
+                out var _, out var _, out var _)) throw new InvalidDataException("Could not read header.");
+            
+            buffer ??= new byte [1024];
+            if (buffer.Length < 1024) throw new ArgumentException("Buffer needs be at least 1024 bytes.", nameof(buffer));
+
+            // read the basics.
+            long? id = null;
+            if (hasId) { id = stream.ReadInt64(buffer); }
+
+            return (type, id);
         }
         
         /// <summary>
