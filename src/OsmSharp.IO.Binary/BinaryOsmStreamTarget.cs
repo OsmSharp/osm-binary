@@ -87,8 +87,8 @@ namespace OsmSharp.Streams
         /// Initializes this target.
         /// </summary>
         public override void Initialize()
-        { 
-
+        {
+            
         }
     }
 }

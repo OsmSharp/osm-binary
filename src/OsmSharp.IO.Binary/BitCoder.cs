@@ -8,14 +8,14 @@ namespace OsmSharp.IO.Binary
     {
         private const byte Mask = 128 - 1;
 
-        public static long WriteVarUInt32(this Stream stream, uint value)
+        public static void WriteVarUInt32(this Stream stream, uint value)
         {
             var d0 = (byte) (value & Mask);
             value >>= 7;
             if (value == 0)
             {
                 stream.WriteByte(d0);
-                return 1;
+                return;
             }
 
             d0 += 128;
@@ -25,7 +25,7 @@ namespace OsmSharp.IO.Binary
             {
                 stream.WriteByte(d0);
                 stream.WriteByte(d1);
-                return 2;
+                return;
             }
 
             d1 += 128;
@@ -36,7 +36,7 @@ namespace OsmSharp.IO.Binary
                 stream.WriteByte(d0);
                 stream.WriteByte(d1);
                 stream.WriteByte(d2);
-                return 3;
+                return;
             }
 
             d2 += 128;
@@ -48,7 +48,7 @@ namespace OsmSharp.IO.Binary
                 stream.WriteByte(d1);
                 stream.WriteByte(d2);
                 stream.WriteByte(d3);
-                return 4;
+                return;
             }
 
             d3 += 128;
@@ -58,17 +58,17 @@ namespace OsmSharp.IO.Binary
             stream.WriteByte(d2);
             stream.WriteByte(d3);
             stream.WriteByte(d4);
-            return 5;
+            return;
         }
 
-        public static long WriteVarUInt64(this Stream stream, ulong value)
+        public static void WriteVarUInt64(this Stream stream, ulong value)
         {
             var d0 = (byte) (value & Mask);
             value >>= 7;
             if (value == 0)
             {
                 stream.WriteByte(d0);
-                return 1;
+                return;
             }
 
             d0 += 128;
@@ -78,7 +78,7 @@ namespace OsmSharp.IO.Binary
             {
                 stream.WriteByte(d0);
                 stream.WriteByte(d1);
-                return 2;
+                return;
             }
 
             d1 += 128;
@@ -89,7 +89,7 @@ namespace OsmSharp.IO.Binary
                 stream.WriteByte(d0);
                 stream.WriteByte(d1);
                 stream.WriteByte(d2);
-                return 3;
+                return;
             }
 
             d2 += 128;
@@ -101,7 +101,7 @@ namespace OsmSharp.IO.Binary
                 stream.WriteByte(d1);
                 stream.WriteByte(d2);
                 stream.WriteByte(d3);
-                return 4;
+                return;
             }
 
             d3 += 128;
@@ -114,7 +114,7 @@ namespace OsmSharp.IO.Binary
                 stream.WriteByte(d2);
                 stream.WriteByte(d3);
                 stream.WriteByte(d4);
-                return 5;
+                return;
             }
 
             d4 += 128;
@@ -128,7 +128,7 @@ namespace OsmSharp.IO.Binary
                 stream.WriteByte(d3);
                 stream.WriteByte(d4);
                 stream.WriteByte(d5);
-                return 6;
+                return;
             }
 
             d5 += 128;
@@ -143,7 +143,7 @@ namespace OsmSharp.IO.Binary
                 stream.WriteByte(d4);
                 stream.WriteByte(d5);
                 stream.WriteByte(d6);
-                return 7;
+                return;
             }
 
             d6 += 128;
@@ -159,7 +159,7 @@ namespace OsmSharp.IO.Binary
                 stream.WriteByte(d5);
                 stream.WriteByte(d6);
                 stream.WriteByte(d7);
-                return 8;
+                return;
             }
 
             d7 += 128;
@@ -176,7 +176,7 @@ namespace OsmSharp.IO.Binary
                 stream.WriteByte(d6);
                 stream.WriteByte(d7);
                 stream.WriteByte(d8);
-                return 9;
+                return;
             }
 
             d8 += 128;
@@ -191,23 +191,24 @@ namespace OsmSharp.IO.Binary
             stream.WriteByte(d7);
             stream.WriteByte(d8);
             stream.WriteByte(d9);
-            return 10;
+            return;
         }
 
-        public static long ReadVarUInt32(this Stream stream, out uint value)
+        public static uint ReadVarUInt32(this Stream stream)
         {
+            var value = 0U;
             var d = stream.ReadByte();
             if (d < 128)
             {
                 value = (uint)d;
-                return 1;
+                return value;
             }
             value = (uint)d - 128;
             d = stream.ReadByte();
             if (d < 128)
             {
                 value += ((uint)d << 7);
-                return 2;
+                return value;
             }
             d -= 128;
             value += ((uint)d << 7);
@@ -215,7 +216,7 @@ namespace OsmSharp.IO.Binary
             if (d < 128)
             {
                 value += ((uint)d << 14);
-                return 3;
+                return value;
             }
             d -= 128;
             value += ((uint)d << 14);
@@ -223,22 +224,23 @@ namespace OsmSharp.IO.Binary
             if (d < 128)
             {
                 value += ((uint)d << 21);
-                return 4;
+                return value;
             }
             d -= 128;
-            value += ((uint)d << 21);
+            value += ((uint)d << 21); 
             d =stream.ReadByte();
             value += ((uint) d << 28);
-            return 5;
+            return value;
         }
 
-        public static long ReadVarUInt64(this Stream stream, out ulong value)
+        public static ulong ReadVarUInt64(this Stream stream)
         {
+            var value = 0UL;
             var d = stream.ReadByte();
             if (d < 128)
             {
                 value = (ulong)d;
-                return 1;
+                return value;
             }
 
             value = (ulong) d - 128;
@@ -246,7 +248,7 @@ namespace OsmSharp.IO.Binary
             if (d < 128)
             {
                 value += ((uint) d << 7);
-                return 2;
+                return value;
             }
 
             d -= 128;
@@ -255,7 +257,7 @@ namespace OsmSharp.IO.Binary
             if (d < 128)
             {
                 value += ((uint) d << 14);
-                return 3;
+                return value;
             }
 
             d -= 128;
@@ -264,7 +266,7 @@ namespace OsmSharp.IO.Binary
             if (d < 128)
             {
                 value += ((ulong) d << 21);
-                return 4;
+                return value;
             }
 
             d -= 128;
@@ -273,7 +275,7 @@ namespace OsmSharp.IO.Binary
             if (d < 128)
             {
                 value += ((ulong) d << 28);
-                return 5;
+                return value;
             }
 
             d -= 128;
@@ -282,7 +284,7 @@ namespace OsmSharp.IO.Binary
             if (d < 128)
             {
                 value += ((ulong) d << 35);
-                return 6;
+                return value;
             }
 
             d -= 128;
@@ -291,7 +293,7 @@ namespace OsmSharp.IO.Binary
             if (d < 128)
             {
                 value += ((ulong) d << 42);
-                return 7;
+                return value;
             }
 
             d -= 128;
@@ -300,7 +302,7 @@ namespace OsmSharp.IO.Binary
             if (d < 128)
             {
                 value += ((ulong) d << 49);
-                return 8;
+                return value;
             }
 
             d -= 128;
@@ -309,20 +311,20 @@ namespace OsmSharp.IO.Binary
             if (d < 128)
             {
                 value += ((ulong) d << 56);
-                return 9;
+                return value;
             }
 
             d -= 128;
             value += ((ulong) d << 56);
             d = stream.ReadByte();;
             value += ((ulong) d << 63);
-            return 10;
+            return value;
         }
 
         private static ulong ToUnsigned(long value)
         {
-            var unsigned = (uint) value;
-            if (value < 0) unsigned = (uint) -value;
+            var unsigned = (ulong) value;
+            if (value < 0) unsigned = (ulong) -value;
 
             unsigned <<= 1;
             if (value < 0)
@@ -351,7 +353,7 @@ namespace OsmSharp.IO.Binary
         {
             var sign = unsigned & (uint)1;
 
-            var value = (int)(unsigned >> 1);
+            var value = (long)(unsigned >> 1);
             if (sign == 1)
             {
                 value = -value;
@@ -373,28 +375,24 @@ namespace OsmSharp.IO.Binary
             return value;
         }
         
-        public static long WriteVarInt32(this Stream data, int value)
+        public static void WriteVarInt32(this Stream data, int value)
         {
-            return data.WriteVarUInt32(ToUnsigned(value));
+            data.WriteVarUInt32(ToUnsigned(value));
         }
 
-        public static long ReadVarInt32(this Stream data, out int value)
+        public static int ReadVarInt32(this Stream data)
         {
-            var c = data.ReadVarUInt32(out var unsigned);
-            value = FromUnsigned(unsigned);
-            return c;
+            return FromUnsigned(data.ReadVarUInt32());
         }
         
-        public static long WriteVarInt64(this Stream data, long value)
+        public static void WriteVarInt64(this Stream data, long value)
         {
-            return data.WriteVarUInt64(ToUnsigned(value));
+            data.WriteVarUInt64(ToUnsigned(value));
         }
 
-        public static long ReadVarInt64(this Stream data, out long value)
+        public static long ReadVarInt64(this Stream data)
         {
-            var c = data.ReadVarUInt64(out var unsigned);
-            value = FromUnsigned(unsigned);
-            return c;
+            return FromUnsigned(data.ReadVarUInt64());
         }
 
         public static void WriteInt64(this Stream stream, long value)

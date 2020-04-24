@@ -58,8 +58,8 @@ namespace OsmSharp.IO.Binary.Test.Functional
                 var target = new OsmSharp.Streams.BinaryOsmStreamTarget(targetStream);
                 target.RegisterSource(source);
                 target.Pull();
+                Log.Information($"Took {new TimeSpan(DateTime.Now.Ticks - ticks).TotalSeconds}s: {targetStream.Length} bytes written");
             }
-            Log.Information($"Took {new TimeSpan(DateTime.Now.Ticks - ticks).TotalSeconds}s");
             
             ticks = DateTime.Now.Ticks;
             Log.Information("Testing reading and write from OSM binary formatted file...");
@@ -71,8 +71,21 @@ namespace OsmSharp.IO.Binary.Test.Functional
                 var target = new OsmSharp.Streams.BinaryOsmStreamTarget(targetStream);
                 target.RegisterSource(source);
                 target.Pull();
+                Log.Information($"Took {new TimeSpan(DateTime.Now.Ticks - ticks).TotalSeconds}s: {targetStream.Length} bytes written");
             }
-            Log.Information($"Took {new TimeSpan(DateTime.Now.Ticks - ticks).TotalSeconds}s");
+            
+            ticks = DateTime.Now.Ticks;
+            Log.Information("Testing reading and write from OSM binary formatted file...");
+            using (var sourceStream = File.OpenRead("test2.osm.bin"))
+            using (var targetStream = File.Open("test3.osm.bin", FileMode.Create))
+            {
+                var source = new OsmSharp.Streams.BinaryOsmStreamSource(sourceStream);
+
+                var target = new OsmSharp.Streams.BinaryOsmStreamTarget(targetStream);
+                target.RegisterSource(source);
+                target.Pull();
+                Log.Information($"Took {new TimeSpan(DateTime.Now.Ticks - ticks).TotalSeconds}s: {targetStream.Length} bytes written");
+            }
             
             ticks = DateTime.Now.Ticks;
             Log.Information("Testing reading from OSM binary formatted file...");
@@ -88,7 +101,8 @@ namespace OsmSharp.IO.Binary.Test.Functional
             Log.Information($"Took {new TimeSpan(DateTime.Now.Ticks - ticks).TotalSeconds}s");
             
             // test read/writing an existing OSM file via a compressed stream.
-            Log.Information("Testing reading/writing via OSM binary format using a compressed stream...");
+            Log.Information("Testing writing via OSM binary format using a compressed stream...");
+            ticks = DateTime.Now.Ticks;
             using (var sourceStream = File.OpenRead("test.osm.pbf"))
             using (var targetStream = File.Open("test2.osm.bin.zip", FileMode.Create))
             using (var targetStreamCompressed = new System.IO.Compression.DeflateStream(targetStream, CompressionLevel.Fastest))
@@ -98,8 +112,11 @@ namespace OsmSharp.IO.Binary.Test.Functional
                 var target = new OsmSharp.Streams.BinaryOsmStreamTarget(targetStreamCompressed);
                 target.RegisterSource(source);
                 target.Pull();
+                Log.Information($"Took {new TimeSpan(DateTime.Now.Ticks - ticks).TotalSeconds}s");
             }
 
+            Log.Information("Testing read from OSM binary format using a compressed stream...");
+            ticks = DateTime.Now.Ticks;
             using (var sourceStream = File.OpenRead("test2.osm.bin.zip"))
             using (var sourceStreamCompressed = new System.IO.Compression.DeflateStream(sourceStream, CompressionMode.Decompress))
             using (var targetStream = File.Open("test2.osm.pbf", FileMode.Create))
@@ -109,6 +126,7 @@ namespace OsmSharp.IO.Binary.Test.Functional
                 var target = new OsmSharp.Streams.PBFOsmStreamTarget(targetStream);
                 target.RegisterSource(source);
                 target.Pull();
+                Log.Information($"Took {new TimeSpan(DateTime.Now.Ticks - ticks).TotalSeconds}s");
             }
 
             // test reading/writing edited OSM-data.
@@ -121,6 +139,7 @@ namespace OsmSharp.IO.Binary.Test.Functional
                 var target = new OsmSharp.Streams.BinaryOsmStreamTarget(targetStream);
                 target.RegisterSource(source);
                 target.Pull();
+                Log.Information($"Took {new TimeSpan(DateTime.Now.Ticks - ticks).TotalSeconds}s");
             }
 
             using (var sourceStream = File.OpenRead("test3.osm.bin"))
