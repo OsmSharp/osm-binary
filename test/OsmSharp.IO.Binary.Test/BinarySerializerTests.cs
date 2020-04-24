@@ -78,7 +78,7 @@ namespace OsmSharp.IO.Binary.Test
             Assert.AreEqual(node1.Latitude, node2.Latitude);
             Assert.AreEqual(node1.Longitude, node2.Longitude);
             Assert.AreEqual(node1.ChangeSetId, node2.ChangeSetId);
-            Assert.AreEqual(node1.TimeStamp, node2.TimeStamp);
+            Assert.AreEqual(node1.TimeStamp.Value.ToUnixTime(), node2.TimeStamp.Value.ToUnixTime());
             Assert.AreEqual(node1.UserId, node2.UserId);
             Assert.AreEqual(node1.UserName, node2.UserName);
             Assert.AreEqual(node1.Version, node2.Version);
@@ -143,7 +143,7 @@ namespace OsmSharp.IO.Binary.Test
 
             Assert.AreEqual(way1.Id, way2.Id);
             Assert.AreEqual(way1.ChangeSetId, way2.ChangeSetId);
-            Assert.AreEqual(way1.TimeStamp, way2.TimeStamp);
+            Assert.AreEqual(way1.TimeStamp.Value.ToUnixTime(), way2.TimeStamp.Value.ToUnixTime());
             Assert.AreEqual(way1.UserId, way2.UserId);
             Assert.AreEqual(way1.UserName, way2.UserName);
             Assert.AreEqual(way1.Version, way2.Version);
@@ -224,7 +224,7 @@ namespace OsmSharp.IO.Binary.Test
 
             Assert.AreEqual(relation1.Id, relation2.Id);
             Assert.AreEqual(relation1.ChangeSetId, relation2.ChangeSetId);
-            Assert.AreEqual(relation1.TimeStamp, relation2.TimeStamp);
+            Assert.AreEqual(relation1.TimeStamp.Value.ToUnixTime(), relation2.TimeStamp.Value.ToUnixTime());
             Assert.AreEqual(relation1.UserId, relation2.UserId);
             Assert.AreEqual(relation1.UserName, relation2.UserName);
             Assert.AreEqual(relation1.Version, relation2.Version);

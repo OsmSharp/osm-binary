@@ -19,13 +19,9 @@
 
   <ItemGroup>
     <None Remove="test-data\node.osm.bin" />
-    <EmbeddedResource Include="test-data\node.osm.bin" />
     <None Remove="test-data\relation.osm.bin" />
-    <EmbeddedResource Include="test-data\relation.osm.bin" />
     <None Remove="test-data\way.osm.bin" />
-    <EmbeddedResource Include="test-data\way.osm.bin" />
     <None Remove="test-data\all.osm.bin" />
-    <EmbeddedResource Include="test-data\all.osm.bin" />
   </ItemGroup>
 
 </Project>
