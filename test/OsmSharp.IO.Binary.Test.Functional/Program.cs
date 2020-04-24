@@ -48,7 +48,8 @@ namespace OsmSharp.IO.Binary.Test.Functional
             Download.ToFile("http://files.itinero.tech/data/OSM/planet/europe/luxembourg-latest.osm.pbf", "test.osm.pbf").Wait();
 
             // test read/writing an existing OSM file.
-            Log.Information("Testing reading/writing via OSM binary format...");
+            Log.Information("Testing write to OSM binary formatted file...");
+            var ticks = DateTime.Now.Ticks;
             using (var sourceStream = File.OpenRead("test.osm.pbf"))
             using (var targetStream = File.Open("test1.osm.bin", FileMode.Create))
             {
@@ -58,6 +59,23 @@ namespace OsmSharp.IO.Binary.Test.Functional
                 target.RegisterSource(source);
                 target.Pull();
             }
+            Log.Information($"Took {new TimeSpan(DateTime.Now.Ticks - ticks).TotalSeconds}s");
+            
+            ticks = DateTime.Now.Ticks;
+            Log.Information("Testing reading and write from OSM binary formatted file...");
+            using (var sourceStream = File.OpenRead("test1.osm.bin"))
+            using (var targetStream = File.Open("test2.osm.bin", FileMode.Create))
+            {
+                var source = new OsmSharp.Streams.BinaryOsmStreamSource(sourceStream);
+
+                var target = new OsmSharp.Streams.BinaryOsmStreamTarget(targetStream);
+                target.RegisterSource(source);
+                target.Pull();
+            }
+            Log.Information($"Took {new TimeSpan(DateTime.Now.Ticks - ticks).TotalSeconds}s");
+            
+            ticks = DateTime.Now.Ticks;
+            Log.Information("Testing reading from OSM binary formatted file...");
             using (var sourceStream = File.OpenRead("test1.osm.bin"))
             using (var targetStream = File.Open("test2.osm.pbf", FileMode.Create))
             {
@@ -67,6 +85,7 @@ namespace OsmSharp.IO.Binary.Test.Functional
                 target.RegisterSource(source);
                 target.Pull();
             }
+            Log.Information($"Took {new TimeSpan(DateTime.Now.Ticks - ticks).TotalSeconds}s");
             
             // test read/writing an existing OSM file via a compressed stream.
             Log.Information("Testing reading/writing via OSM binary format using a compressed stream...");

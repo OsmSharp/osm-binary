@@ -33,8 +33,6 @@ namespace OsmSharp.IO.Binary
     /// </summary>
     public static class BinarySerializer
     {
-        private static System.Text.Encoder _encoder = (new System.Text.UnicodeEncoding()).GetEncoder();
-
         /// <summary>
         /// Appends the header byte(s).
         /// </summary>
@@ -80,8 +78,8 @@ namespace OsmSharp.IO.Binary
             if (!node.Longitude.HasValue) { header = (byte)(header | 2); }
             size += 1;
             stream.WriteByte(header);
-            if (node.Latitude.HasValue) { size += stream.Write(node.Latitude.Value); }
-            if (node.Longitude.HasValue) { size += stream.Write(node.Longitude.Value); }
+            if (node.Latitude.HasValue) { size += stream.WriteDouble(node.Latitude.Value); }
+            if (node.Longitude.HasValue) { size += stream.WriteDouble(node.Longitude.Value); }
 
             return size;
         }
@@ -102,14 +100,14 @@ namespace OsmSharp.IO.Binary
             if (way.Nodes == null ||
                 way.Nodes.Length == 0)
             {
-                size += stream.Write(0);
+                size += WriteInt32(stream, 0);
             }
             else
             {
-                size += stream.Write(way.Nodes.Length);
+                size += WriteInt32(stream, way.Nodes.Length);
                 for (var i = 0; i < way.Nodes.Length; i++)
                 {
-                    size += stream.Write(way.Nodes[i]);
+                    size += WriteInt64(stream, way.Nodes[i]);
                 }
             }
 
@@ -132,14 +130,14 @@ namespace OsmSharp.IO.Binary
             if (relation.Members == null ||
                 relation.Members.Length == 0)
             {
-                size += stream.Write(0);
+                size += WriteInt32(stream, 0);
             }
             else
             {
-                size += stream.Write(relation.Members.Length);
+                size += WriteInt32(stream, relation.Members.Length);
                 for (var i = 0; i < relation.Members.Length; i++)
                 {
-                    size += stream.Write(relation.Members[i].Id);
+                    size += WriteInt64(stream, relation.Members[i].Id);
                     size += stream.WriteWithSize(relation.Members[i].Role);
                     switch (relation.Members[i].Type)
                     {
@@ -174,26 +172,26 @@ namespace OsmSharp.IO.Binary
             };
         }
         
-        public static int AppendOsmGeo(this Stream stream, OsmGeo osmGeo)
+        private static int AppendOsmGeo(this Stream stream, OsmGeo osmGeo)
         {
             var size = 0;
 
-            if (osmGeo.Id.HasValue) { size += stream.Write(osmGeo.Id.Value); }
-            if (osmGeo.ChangeSetId.HasValue) { size += stream.Write(osmGeo.ChangeSetId.Value); }
+            if (osmGeo.Id.HasValue) { size += WriteInt64(stream, osmGeo.Id.Value); }
+            if (osmGeo.ChangeSetId.HasValue) { size += WriteInt64(stream, osmGeo.ChangeSetId.Value); }
             if (osmGeo.TimeStamp.HasValue) { size += stream.Write(osmGeo.TimeStamp.Value); }
-            if (osmGeo.UserId.HasValue) { size += stream.Write(osmGeo.UserId.Value); }
+            if (osmGeo.UserId.HasValue) { size += WriteInt64(stream, osmGeo.UserId.Value); }
             size += stream.WriteWithSize(osmGeo.UserName);
-            if (osmGeo.Version.HasValue) { size += stream.Write((int)osmGeo.Version.Value); }
+            if (osmGeo.Version.HasValue) { size += WriteInt32(stream, (int)osmGeo.Version.Value); }
             if (osmGeo.Visible.HasValue) { size += stream.Write(osmGeo.Visible.Value); }
             
             if (osmGeo.Tags == null ||
                 osmGeo.Tags.Count == 0)
             {
-                size += stream.Write(0);
+                size += WriteInt32(stream, 0);
             }
             else
             {
-                size += stream.Write(osmGeo.Tags.Count);
+                size += WriteInt32(stream, osmGeo.Tags.Count);
                 foreach (var t in osmGeo.Tags)
                 {
                     size += stream.WriteWithSize(t.Key);
@@ -207,7 +205,7 @@ namespace OsmSharp.IO.Binary
         /// <summary>
         /// Reads the header, returns the type, and outputs the flags.
         /// </summary>
-        public static bool TryReadOsmGeoHeader(this Stream stream, out OsmGeoType type, out bool hasId, out bool hasChangesetId, out bool hasTimestamp,
+        internal static bool TryReadOsmGeoHeader(this Stream stream, out OsmGeoType type, out bool hasId, out bool hasChangesetId, out bool hasTimestamp,
             out bool hasUserId, out bool hasVersion, out bool hasVisible)
         {
             var header = stream.ReadByte();
@@ -414,39 +412,30 @@ namespace OsmSharp.IO.Binary
         /// <summary>
         /// Writes the given value to the stream.
         /// </summary>
-        public static int Write(this Stream stream, int value)
+        public static int WriteInt32(this Stream stream, int value)
         {
-            stream.Write(BitConverter.GetBytes(value), 0, 4);
-            return 4;
-        }
-        
-        private static int Write(this Stream stream, float value)
-        {
-            stream.Write(BitConverter.GetBytes(value), 0, 4);
+            BitCoder.WriteInt32(stream, value);
             return 4;
         }
 
-        private static int Write(this Stream stream, double value)
+        private static int WriteDouble(this Stream stream, double value)
         {
-            stream.Write(BitConverter.GetBytes(value), 0, 8);
+            BitCoder.WriteInt64(stream, BitConverter.DoubleToInt64Bits(value));
+            //stream.Write(BitConverter.GetBytes(value), 0, 8);
             return 8;
         }
 
-        private static int Write(this Stream stream, long value)
+        private static int WriteInt64(this Stream stream, long value)
         {
-            stream.Write(BitConverter.GetBytes(value), 0, 8);
-            return 8;
-        }
-
-        private static int Write(this Stream stream, ulong value)
-        {
-            stream.Write(BitConverter.GetBytes(value), 0, 8);
+            BitCoder.WriteInt64(stream, value);
+            //stream.Write(BitConverter.GetBytes(value), 0, 8);
             return 8;
         }
 
         private static int Write(this Stream stream, DateTime value)
         {
-            stream.Write(BitConverter.GetBytes(value.Ticks), 0, 8);
+            BitCoder.WriteInt64(stream, value.Ticks);
+            //stream.Write(BitConverter.GetBytes(value.Ticks), 0, 8);
             return 8;
         }
 
@@ -496,14 +485,16 @@ namespace OsmSharp.IO.Binary
 
         private static long ReadInt64(this Stream stream, byte[] buffer)
         {
-            var c = stream.Read(buffer, 0, 8);
-            return BitConverter.ToInt64(buffer, 0);
+            return stream.ReadInt64();
+            //var c = stream.Read(buffer, 0, 8);
+            //return BitConverter.ToInt64(buffer, 0);
         }
 
         private static int ReadInt32(this Stream stream, byte[] buffer)
         {
-            stream.Read(buffer, 0, 4);
-            return BitConverter.ToInt32(buffer, 0);
+            return stream.ReadInt32();
+            //stream.Read(buffer, 0, 4);
+            //return BitConverter.ToInt32(buffer, 0);
         }
 
         private static bool ReadBool(this Stream stream)
@@ -523,16 +514,12 @@ namespace OsmSharp.IO.Binary
             }
         }
 
-        private static float ReadSingle(this Stream stream, byte[] buffer)
-        {
-            stream.Read(buffer, 0, 4);
-            return BitConverter.ToSingle(buffer, 0);
-        }
-
         private static double ReadDouble(this Stream stream, byte[] buffer)
         {
-            stream.Read(buffer, 0, 8);
-            return BitConverter.ToDouble(buffer, 0);
+            var value = stream.ReadInt64();
+            return BitConverter.Int64BitsToDouble(value);
+            //stream.Read(buffer, 0, 8);
+            //return BitConverter.ToDouble(buffer, 0);
         }
 
         private static string ReadWithSizeString(this System.IO.Stream stream, byte[] buffer)
@@ -551,7 +538,7 @@ namespace OsmSharp.IO.Binary
             }
 
 
-            return System.Text.UnicodeEncoding.Unicode.GetString(buffer, 0, size);
+            return System.Text.Encoding.Unicode.GetString(buffer, 0, size);
         }
     }
 }
