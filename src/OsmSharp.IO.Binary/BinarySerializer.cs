@@ -181,6 +181,7 @@ namespace OsmSharp.IO.Binary
                 stream.WriteVarInt32(osmGeo.Tags.Count);
                 foreach (var t in osmGeo.Tags)
                 {
+                    if (t.Key == null) Console.WriteLine(osmGeo);
                     stream.WriteWithSize(t.Key);
                     stream.WriteWithSize(t.Value);
                 }
@@ -475,44 +476,32 @@ namespace OsmSharp.IO.Binary
             return 1;
         }
 
-        private static int WriteWithSize(this Stream stream, string value)
+        private static void WriteWithSize(this Stream stream, string value)
         {
-            if (string.IsNullOrWhiteSpace(value))
+            if (value == null)
             {
-                stream.WriteByte(0);
-                return 1;
+                stream.WriteVarInt32((int)0);
+            }
+            else if (string.IsNullOrWhiteSpace(value))
+            {
+                stream.WriteVarInt32((int)1);
             }
             else
-            { // TODO: improve this based on the protobuf way of handling this kind of variable info.
+            {
                 var bytes = System.Text.Encoding.Unicode.GetBytes(value);
-                var position = 0;
-                while(bytes.Length - position >= 255)
-                { // write in blocks of 255.
-                    stream.WriteByte(255);
-                    stream.Write(bytes, position, 255);
-                    position += 256; // data + size
-                }
-                stream.WriteByte((byte)(bytes.Length - position));
-                if (bytes.Length - position > 0)
-                {
-                    stream.Write(bytes, position, bytes.Length - position);
-                }
-                return bytes.Length + 1;
+                stream.WriteVarInt32(bytes.Length + 2);
+                stream.Write(bytes, 0, bytes.Length);
             }
         }
 
         private static long ReadInt64(this Stream stream, byte[] buffer)
         {
             return stream.ReadInt64();
-            //var c = stream.Read(buffer, 0, 8);
-            //return BitConverter.ToInt64(buffer, 0);
         }
 
         private static int ReadInt32(this Stream stream, byte[] buffer)
         {
             return stream.ReadInt32();
-            //stream.Read(buffer, 0, 4);
-            //return BitConverter.ToInt32(buffer, 0);
         }
 
         private static bool ReadBool(this Stream stream)
@@ -538,21 +527,14 @@ namespace OsmSharp.IO.Binary
             return BitConverter.Int64BitsToDouble(value);
         }
 
-        private static string ReadWithSizeString(this System.IO.Stream stream, byte[] buffer)
+        private static string ReadWithSizeString(this Stream stream, byte[] buffer)
         {
-            var size = stream.ReadByte();
-            var position = 0;
-            while (size == 255)
-            {
-                stream.Read(buffer, position, (int)size);
-                size = stream.ReadByte();
-                position += 256;
-            }
-            if (size > 0)
-            {
-                stream.Read(buffer, position, (int)size);
-            }
+            var size = stream.ReadVarInt32();
+            if (size == 0) return null;
+            if (size == 1) return string.Empty;
 
+            size -= 2;
+            stream.Read(buffer, 0, size);
 
             return System.Text.Encoding.Unicode.GetString(buffer, 0, size);
         }
