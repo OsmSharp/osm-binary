@@ -37,7 +37,7 @@ namespace OsmSharp.IO.Binary
         /// <summary>
         /// Appends the header byte(s).
         /// </summary>
-        public static void AppendHeader(this Stream stream, OsmGeo osmGeo)
+        private static void AppendHeader(this Stream stream, OsmGeo osmGeo)
         {
             // build header containing type and nullable flags.
             byte header = 1; // a node.
@@ -142,7 +142,7 @@ namespace OsmSharp.IO.Binary
         /// <summary>
         /// Writes the given osm geo object starting at the stream's current position.
         /// </summary>
-        public static void Append(this Stream stream, OsmGeo osmGeo, byte[] buffer)
+        public static void Append(this Stream stream, OsmGeo osmGeo, byte[] buffer = null)
         {
             if (osmGeo is Node node)
             {
