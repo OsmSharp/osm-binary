@@ -22,6 +22,7 @@
 
 using OsmSharp.Tags;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using OsmSharp.Db;
@@ -60,7 +61,7 @@ namespace OsmSharp.IO.Binary
         /// <summary>
         /// Writes the given node starting at the stream's current position.
         /// </summary>
-        public static void Append(this Stream stream, Node node)
+        public static void Append(this Stream stream, Node node, byte[] buffer = null)
         {
             if (node == null) { throw new ArgumentNullException(nameof(node)); }
 
@@ -68,21 +69,17 @@ namespace OsmSharp.IO.Binary
             stream.AppendHeader(node);
 
             // write osm geo data.
-            stream.AppendOsmGeo(node);
+            stream.AppendOsmGeo(node, buffer);
 
             // write lat/lon with nullable flags.
-            byte header = 0;
-            if (!node.Latitude.HasValue) { header = (byte)(header | 1); }
-            if (!node.Longitude.HasValue) { header = (byte)(header | 2); }
-            stream.WriteByte(header);
-            if (node.Latitude.HasValue) { stream.WriteVarInt64(node.Latitude.Value.EncodeLatitude()); }
-            if (node.Longitude.HasValue) { stream.WriteVarInt64(node.Longitude.Value.EncodeLongitude()); }
+            stream.WriteVarInt64Nullable(node.Latitude.EncodeLatitude());
+            stream.WriteVarInt64Nullable(node.Longitude.EncodeLongitude());
         }
 
         /// <summary>
         /// Writes the given way starting at the stream's current position.
         /// </summary>
-        public static void Append(this Stream stream, Way way)
+        public static void Append(this Stream stream, Way way, byte[] buffer = null)
         {
             if (way == null) { throw new ArgumentNullException(nameof(way)); }
 
@@ -90,7 +87,7 @@ namespace OsmSharp.IO.Binary
             stream.AppendHeader(way);
 
             // write data.
-            stream.AppendOsmGeo(way);
+            stream.AppendOsmGeo(way, buffer);
             
             if (way.Nodes == null ||
                 way.Nodes.Length == 0)
@@ -111,7 +108,7 @@ namespace OsmSharp.IO.Binary
         /// <summary>
         /// Writes the given relation starting at the stream's current position.
         /// </summary>
-        public static void Append(this Stream stream, Relation relation)
+        public static void Append(this Stream stream, Relation relation, byte[] buffer = null)
         {
             if (relation == null) { throw new ArgumentNullException(nameof(relation)); }
 
@@ -119,7 +116,7 @@ namespace OsmSharp.IO.Binary
             stream.AppendHeader(relation);
 
             // write data.
-            stream.AppendOsmGeo(relation);
+            stream.AppendOsmGeo(relation, buffer);
             
             if (relation.Members == null ||
                 relation.Members.Length == 0)
@@ -130,13 +127,13 @@ namespace OsmSharp.IO.Binary
             {
                 stream.WriteVarInt32(relation.Members.Length);
                 stream.WriteVarInt64(relation.Members[0].Id);
-                stream.WriteWithSize(relation.Members[0].Role);
+                stream.WriteWithSize(relation.Members[0].Role, buffer);
                 stream.WriteOsmGeoType(relation.Members[0].Type);
                 
                 for (var i = 1; i < relation.Members.Length; i++)
                 {
                     stream.WriteVarInt64(relation.Members[i].Id - relation.Members[i - 1].Id);
-                    stream.WriteWithSize(relation.Members[i].Role);
+                    stream.WriteWithSize(relation.Members[i].Role, buffer);
                     stream.WriteOsmGeoType(relation.Members[i].Type);
                 }
             }
@@ -145,30 +142,30 @@ namespace OsmSharp.IO.Binary
         /// <summary>
         /// Writes the given osm geo object starting at the stream's current position.
         /// </summary>
-        public static void Append(this Stream stream, OsmGeo osmGeo)
+        public static void Append(this Stream stream, OsmGeo osmGeo, byte[] buffer)
         {
             if (osmGeo is Node node)
             {
-                stream.Append(node);
+                stream.Append(node, buffer);
             }
             else if (osmGeo is Way way)
             {
-                stream.Append(way);
+                stream.Append(way, buffer);
             }
             else if (osmGeo is Relation relation)
             {
-                stream.Append(relation);
+                stream.Append(relation, buffer);
             }
         }
         
-        private static void AppendOsmGeo(this Stream stream, OsmGeo osmGeo)
+        private static void AppendOsmGeo(this Stream stream, OsmGeo osmGeo, byte[] buffer)
         {
             if (osmGeo.Id.HasValue) { stream.WriteVarInt64(osmGeo.Id.Value); }
             if (osmGeo.Version.HasValue) { stream.WriteVarInt32((int)osmGeo.Version.Value); }
             if (osmGeo.ChangeSetId.HasValue) { stream.WriteVarInt64(osmGeo.ChangeSetId.Value); }
             if (osmGeo.TimeStamp.HasValue) { stream.WriteVarInt64(osmGeo.TimeStamp.Value.ToUnixTime()); }
             if (osmGeo.UserId.HasValue) { stream.WriteVarInt64(osmGeo.UserId.Value); }
-            stream.WriteWithSize(osmGeo.UserName);
+            stream.WriteWithSize(osmGeo.UserName, buffer);
             if (osmGeo.Visible.HasValue) { stream.Write(osmGeo.Visible.Value); }
             
             if (osmGeo.Tags == null ||
@@ -181,9 +178,8 @@ namespace OsmSharp.IO.Binary
                 stream.WriteVarInt32(osmGeo.Tags.Count);
                 foreach (var t in osmGeo.Tags)
                 {
-                    if (t.Key == null) Console.WriteLine(osmGeo);
-                    stream.WriteWithSize(t.Key);
-                    stream.WriteWithSize(t.Value);
+                    stream.WriteWithSize(t.Key, buffer);
+                    stream.WriteWithSize(t.Value, buffer);
                 }
             }
         }
@@ -326,13 +322,9 @@ namespace OsmSharp.IO.Binary
         private static Node ReadNode(this Stream stream)
         {
             var node = new Node();
-
-            var header = stream.ReadByte();
-            var hasLatitude = (header & 1) == 0;
-            var hasLongitude = (header & 2) == 0;
-
-            if (hasLatitude) { node.Latitude = stream.ReadVarInt64().DecodeLatitude(); }
-            if (hasLongitude) { node.Longitude = stream.ReadVarInt64().DecodeLongitude(); }
+    
+            node.Latitude = stream.ReadVarInt64Nullable().DecodeLatitude();
+            node.Longitude = stream.ReadVarInt64Nullable().DecodeLongitude();
 
             return node;
         }
@@ -363,35 +355,34 @@ namespace OsmSharp.IO.Binary
             var relation = new Relation();
             
             var memberCount = stream.ReadVarInt32();
-            if (memberCount > 0)
+            if (memberCount <= 0) return relation;
+            
+            var members = new RelationMember[memberCount];
+            var id = stream.ReadVarInt64();
+            var role = stream.ReadWithSizeString(buffer);
+            var type = stream.ReadOsmGeoType();
+            members[0] = new RelationMember()
             {
-                var members = new RelationMember[memberCount];
-                var id = stream.ReadVarInt64();
-                var role = stream.ReadWithSizeString(buffer);
-                var type = stream.ReadOsmGeoType();
-                members[0] = new RelationMember()
+                Id = id,
+                Role = role,
+                Type = type
+            };
+                
+            for(var i = 1; i< memberCount; i++)
+            {
+                var idDif = stream.ReadVarInt64();
+                id += idDif;
+                role = stream.ReadWithSizeString(buffer);
+                type = stream.ReadOsmGeoType();
+                    
+                members[i] = new RelationMember()
                 {
                     Id = id,
                     Role = role,
                     Type = type
                 };
-                
-                for(var i = 1; i< memberCount; i++)
-                {
-                    var idDif = stream.ReadVarInt64();
-                    id += idDif;
-                    role = stream.ReadWithSizeString(buffer);
-                    type = stream.ReadOsmGeoType();
-                    
-                    members[i] = new RelationMember()
-                    {
-                        Id = id,
-                        Role = role,
-                        Type = type
-                    };
-                }
-                relation.Members = members;
             }
+            relation.Members = members;
 
             return relation;
         }
@@ -429,39 +420,47 @@ namespace OsmSharp.IO.Binary
             return type;
         }
 
-        private static long EncodeLatitude(this double latitude)
+        private static long? EncodeLatitude(this double? latitude)
         {
-            return (long) (100000000 * latitude);
+            if (latitude == null) return null;
+            
+            return (long) (100000000 * latitude.Value);
         }
 
-        private static double DecodeLatitude(this long encoded)
+        private static double? DecodeLatitude(this long? encoded)
         {
-            return (encoded / 100000000.0);
+            if (encoded == null) return null;
+
+            return (encoded.Value / 100000000.0);
         }
 
-        private static long EncodeLongitude(this double latitude)
+        private static long? EncodeLongitude(this double? latitude)
         {
+            if (latitude == null) return null;
+            
             return (long) (1000000000 * latitude);
         }
 
-        private static double DecodeLongitude(this long encoded)
+        private static double? DecodeLongitude(this long? encoded)
         {
+            if (encoded == null) return null;
+
             return (encoded / 1000000000.0);
         }
-
-        private static int WriteDouble(this Stream stream, double value)
-        {
-            BitCoder.WriteInt64(stream, BitConverter.DoubleToInt64Bits(value));
-            //stream.Write(BitConverter.GetBytes(value), 0, 8);
-            return 8;
-        }
-
-        private static int WriteInt64(this Stream stream, long value)
-        {
-            BitCoder.WriteInt64(stream, value);
-            //stream.Write(BitConverter.GetBytes(value), 0, 8);
-            return 8;
-        }
+//
+//        private static int WriteDouble(this Stream stream, double value)
+//        {
+//            BitCoder.WriteInt64(stream, BitConverter.DoubleToInt64Bits(value));
+//            //stream.Write(BitConverter.GetBytes(value), 0, 8);
+//            return 8;
+//        }
+//
+//        private static int WriteInt64(this Stream stream, long value)
+//        {
+//            BitCoder.WriteInt64(stream, value);
+//            //stream.Write(BitConverter.GetBytes(value), 0, 8);
+//            return 8;
+//        }
 
         private static int Write(this Stream stream, bool value)
         {
@@ -476,7 +475,7 @@ namespace OsmSharp.IO.Binary
             return 1;
         }
 
-        private static void WriteWithSize(this Stream stream, string value)
+        private static void WriteWithSize(this Stream stream, string value, byte[] buffer)
         {
             if (value == null)
             {
@@ -488,9 +487,18 @@ namespace OsmSharp.IO.Binary
             }
             else
             {
-                var bytes = System.Text.Encoding.Unicode.GetBytes(value);
-                stream.WriteVarInt32(bytes.Length + 2);
-                stream.Write(bytes, 0, bytes.Length);
+                var maxSize = System.Text.Encoding.Unicode.GetMaxByteCount(value.Length);
+                if (buffer == null)
+                {
+                    buffer = new byte[maxSize];
+                }
+                else if (buffer.Length < maxSize)
+                {
+                    Array.Resize(ref buffer, maxSize);
+                }
+                var size = System.Text.Encoding.Unicode.GetBytes(value, 0, value.Length, buffer, 0);
+                stream.WriteVarInt32(size + 2);
+                stream.Write(buffer, 0, size);
             }
         }
 
@@ -534,6 +542,10 @@ namespace OsmSharp.IO.Binary
             if (size == 1) return string.Empty;
 
             size -= 2;
+            if (buffer.Length < size)
+            {
+                Array.Resize(ref buffer, size);
+            }
             stream.Read(buffer, 0, size);
 
             return System.Text.Encoding.Unicode.GetString(buffer, 0, size);

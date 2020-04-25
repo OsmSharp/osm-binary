@@ -8,6 +8,18 @@ namespace OsmSharp.IO.Binary
     {
         private const byte Mask = 128 - 1;
 
+        public static void WriteVarUInt32Nullable(this Stream stream, uint? value)
+        {
+            if (value == null)
+            {
+                stream.WriteVarUInt32(0);
+            }
+            else
+            {
+                stream.WriteVarUInt32(value.Value + 1);
+            }
+        }
+
         public static void WriteVarUInt32(this Stream stream, uint value)
         {
             var d0 = (byte) (value & Mask);
@@ -59,6 +71,19 @@ namespace OsmSharp.IO.Binary
             stream.WriteByte(d3);
             stream.WriteByte(d4);
             return;
+        }
+
+
+        public static void WriteVarUInt64Nullable(this Stream stream, ulong? value)
+        {
+            if (value == null)
+            {
+                stream.WriteVarUInt64(0);
+            }
+            else
+            {
+                stream.WriteVarUInt64(value.Value + 1);
+            }
         }
 
         public static void WriteVarUInt64(this Stream stream, ulong value)
@@ -194,6 +219,14 @@ namespace OsmSharp.IO.Binary
             return;
         }
 
+        public static uint? ReadVarUInt32Nullable(this Stream stream)
+        {
+            var value = stream.ReadVarUInt32();
+            if (value == 0) return null;
+
+            return value - 1;
+        }
+
         public static uint ReadVarUInt32(this Stream stream)
         {
             var value = 0U;
@@ -231,6 +264,14 @@ namespace OsmSharp.IO.Binary
             d =stream.ReadByte();
             value += ((uint) d << 28);
             return value;
+        }
+
+        public static ulong? ReadVarUInt64Nullable(this Stream stream)
+        {
+            var value = stream.ReadVarUInt64();
+            if (value == 0) return null;
+
+            return value - 1;
         }
 
         public static ulong ReadVarUInt64(this Stream stream)
@@ -335,8 +376,42 @@ namespace OsmSharp.IO.Binary
             return unsigned;
         }
 
+        private static ulong? ToUnsigned(long? valueNullable)
+        {
+            if (valueNullable == null) return null;
+
+            var value = valueNullable.Value;
+            var unsigned = (ulong) value;
+            if (value < 0) unsigned = (ulong) -value;
+
+            unsigned <<= 1;
+            if (value < 0)
+            {
+                unsigned += 1;
+            }
+
+            return unsigned;
+        }
+
         private static uint ToUnsigned(int value)
         {
+            var unsigned = (uint) value;
+            if (value < 0) unsigned = (uint) -value;
+
+            unsigned <<= 1;
+            if (value < 0)
+            {
+                unsigned += 1;
+            }
+
+            return unsigned;
+        }
+
+        private static uint? ToUnsigned(int? valueNullable)
+        {
+            if (valueNullable == null) return null;
+
+            var value = valueNullable.Value;
             var unsigned = (uint) value;
             if (value < 0) unsigned = (uint) -value;
 
@@ -362,6 +437,22 @@ namespace OsmSharp.IO.Binary
             return value;
         }
 
+        private static long? FromUnsigned(ulong? unsignedNullable)
+        {
+            if (unsignedNullable == null) return null;
+
+            var unsigned = unsignedNullable.Value;
+            var sign = unsigned & (uint)1;
+
+            var value = (long)(unsigned >> 1);
+            if (sign == 1)
+            {
+                value = -value;
+            }
+
+            return value;
+        }
+
         private static int FromUnsigned(uint unsigned)
         {
             var sign = unsigned & (uint)1;
@@ -374,10 +465,36 @@ namespace OsmSharp.IO.Binary
 
             return value;
         }
+
+        private static int? FromUnsigned(uint? unsignedNullable)
+        {
+            if (unsignedNullable == null) return null;
+
+            var unsigned = unsignedNullable.Value;
+            var sign = unsigned & (uint)1;
+
+            var value = (int)(unsigned >> 1);
+            if (sign == 1)
+            {
+                value = -value;
+            }
+
+            return value;
+        }
+        
+        public static void WriteVarInt32Nullable(this Stream data, int? value)
+        {
+            data.WriteVarUInt32Nullable(ToUnsigned(value));
+        }
         
         public static void WriteVarInt32(this Stream data, int value)
         {
             data.WriteVarUInt32(ToUnsigned(value));
+        }
+
+        public static int? ReadVarInt32Nullable(this Stream data)
+        {
+            return FromUnsigned(data.ReadVarUInt32Nullable());
         }
 
         public static int ReadVarInt32(this Stream data)
@@ -385,9 +502,19 @@ namespace OsmSharp.IO.Binary
             return FromUnsigned(data.ReadVarUInt32());
         }
         
+        public static void WriteVarInt64Nullable(this Stream data, long? value)
+        {
+            data.WriteVarUInt64Nullable(ToUnsigned(value));
+        }
+        
         public static void WriteVarInt64(this Stream data, long value)
         {
             data.WriteVarUInt64(ToUnsigned(value));
+        }
+
+        public static long? ReadVarInt64Nullable(this Stream data)
+        {
+            return FromUnsigned(data.ReadVarUInt64Nullable());
         }
 
         public static long ReadVarInt64(this Stream data)

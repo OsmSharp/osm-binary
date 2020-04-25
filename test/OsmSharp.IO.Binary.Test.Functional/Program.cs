@@ -130,6 +130,7 @@ namespace OsmSharp.IO.Binary.Test.Functional
             }
 
             // test reading/writing edited OSM-data.
+            ticks = DateTime.Now.Ticks;
             Log.Information("Testing reading/writing via OSM binary format of edited incomplete OSM data...");
             using (var sourceStream = File.OpenRead("./test-data/data.osm"))
             using (var targetStream = File.Open("test3.osm.bin", FileMode.Create))
@@ -139,7 +140,6 @@ namespace OsmSharp.IO.Binary.Test.Functional
                 var target = new OsmSharp.Streams.BinaryOsmStreamTarget(targetStream);
                 target.RegisterSource(source);
                 target.Pull();
-                Log.Information($"Took {new TimeSpan(DateTime.Now.Ticks - ticks).TotalSeconds}s");
             }
 
             using (var sourceStream = File.OpenRead("test3.osm.bin"))
@@ -151,6 +151,7 @@ namespace OsmSharp.IO.Binary.Test.Functional
                 target.RegisterSource(source);
                 target.Pull();
             }
+            Log.Information($"Took {new TimeSpan(DateTime.Now.Ticks - ticks).TotalSeconds}s");
         }
     }
 }

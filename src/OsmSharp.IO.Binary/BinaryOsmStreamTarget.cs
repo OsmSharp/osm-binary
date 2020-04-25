@@ -40,22 +40,16 @@ namespace OsmSharp.Streams
             _stream = stream;
         }
 
+        private byte[] _buffer;
+
         /// <summary>
         /// Adds a node.
         /// </summary>
         /// <param name="node"></param>
         public override void AddNode(Node node)
         {
-            _stream.Append(node);
-        }
-
-        /// <summary>
-        /// Adds a relation.
-        /// </summary>
-        /// <param name="relation"></param>
-        public override void AddRelation(Relation relation)
-        {
-            _stream.Append(relation);
+            if (_buffer == null) _buffer = new byte[1024];
+            _stream.Append(node, _buffer);
         }
 
         /// <summary>
@@ -64,7 +58,18 @@ namespace OsmSharp.Streams
         /// <param name="way"></param>
         public override void AddWay(Way way)
         {
-            _stream.Append(way);
+            if (_buffer == null) _buffer = new byte[1024];
+            _stream.Append(way, _buffer);
+        }
+
+        /// <summary>
+        /// Adds a relation.
+        /// </summary>
+        /// <param name="relation"></param>
+        public override void AddRelation(Relation relation)
+        {
+            if (_buffer == null) _buffer = new byte[1024];
+            _stream.Append(relation, _buffer);
         }
         
         /// <summary>
