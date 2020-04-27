@@ -542,6 +542,26 @@ namespace OsmSharp.IO.Binary
             return value;
         }
 
+        public static void WriteUInt32(this Stream stream, uint value)
+        {
+            for (var b = 0; b < 4; b++)
+            {
+                stream.WriteByte((byte)(value & byte.MaxValue));
+                value >>= 8;
+            }
+        }
+
+        public static ulong ReadUInt32(this Stream stream)
+        {
+            var value = 0UL;
+            for (var b = 0; b < 4; b++)
+            {
+                value += ((ulong)stream.ReadByte() << (b * 8));
+            }
+
+            return value;
+        }
+
         public static void WriteUInt64(this Stream stream, ulong value)
         {
             for (var b = 0; b < 8; b++)

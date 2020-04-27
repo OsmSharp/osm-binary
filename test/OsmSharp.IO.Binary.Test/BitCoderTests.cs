@@ -70,6 +70,37 @@ namespace OsmSharp.IO.Binary.Test
         }
         
         [TestMethod]
+        public void BitCoder_WriteUInt32_ShouldWrite4BytesAndValue()
+        {
+            var data = new MemoryStream();
+
+            var test = 1457167146U;
+            data.WriteUInt32(test);
+
+            Assert.AreEqual(4, data.Length);
+            data.Seek(0, SeekOrigin.Begin);
+            var buffer = new byte[8];
+            data.Read(buffer, 0, 8);
+            var result = BitConverter.ToUInt32(buffer);
+            Assert.AreEqual(test, result);
+        }
+        
+        [TestMethod]
+        public void BitCoder_ReadUInt32_ShouldReadValue()
+        {
+            var data = new MemoryStream();
+
+            var test = 1457167412U;
+            data.Write(BitConverter.GetBytes(test));
+
+            data.Seek(0, SeekOrigin.Begin);
+            var result = data.ReadUInt32();
+
+            Assert.AreEqual(4,data.Length);
+            Assert.AreEqual(test, result);
+        }
+        
+        [TestMethod]
         public void BitCoder_WriteUInt64_ShouldWrite8BytesAndValue()
         {
             var data = new MemoryStream();

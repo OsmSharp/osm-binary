@@ -249,6 +249,52 @@ namespace OsmSharp.IO.Binary
             var id = stream.ReadVarInt64();
             return (type, id);
         }
+
+        /// <summary>
+        /// Skip over the next osm geo object without reading it.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        public static void SkipOsmGeo(this Stream stream)
+        {
+            if (stream.CanSeek &&
+                stream.Length == stream.Position) return;
+
+            if (!stream.TryReadOsmGeoHeader(out var type, out var hasId, out var hasChangesetId, out var hasTimestamp,
+                out var hasUserId, out var hasVersion, out var hasVisible)) return; // couldn't read header.
+            
+            // read the basics.
+            if (hasId) { stream.ReadVarInt64(); }
+            if (hasVersion) { stream.ReadVarInt32(); }
+            if (hasChangesetId) { stream.ReadVarInt64(); }
+            if (hasTimestamp) { stream.ReadVarInt64().FromUnixTime(); }
+            if (hasUserId) { stream.ReadVarInt64(); }
+            stream.SkipStringWithSize();
+            if (hasVisible) { stream.ReadBool(); }
+
+            // read tags.
+            var tagsCount = stream.ReadVarInt32();
+            if (tagsCount > 0)
+            {
+                for (var i = 0; i < tagsCount; i++)
+                {
+                    stream.SkipStringWithSize();
+                    stream.SkipStringWithSize();
+                }
+            }
+
+            switch (type)
+            {
+                case OsmGeoType.Node:
+                    stream.SkipNode();
+                    break;
+                case OsmGeoType.Way:
+                     stream.SkipWay();
+                    break;
+                default:
+                    stream.SkipRelation();
+                    break;
+            }
+        }
         
         /// <summary>
         /// Reads an OSM object starting at the stream's current position.
@@ -329,6 +375,12 @@ namespace OsmSharp.IO.Binary
             return node;
         }
 
+        private static void SkipNode(this Stream stream)
+        {
+            stream.ReadVarInt64Nullable();
+            stream.ReadVarInt64Nullable();
+        }
+
         private static Way ReadWay(this Stream stream)
         {
             var way = new Way();
@@ -348,6 +400,18 @@ namespace OsmSharp.IO.Binary
             way.Nodes = nodes;
 
             return way;
+        }
+
+        private static void SkipWay(this Stream stream)
+        {
+            var nodeCount = stream.ReadVarInt32();
+            if (nodeCount <= 0) return;
+            
+            stream.ReadVarInt64();
+            for (var i = 1; i < nodeCount; i++)
+            {
+                stream.ReadVarInt64();
+            }
         }
 
         private static Relation ReadRelation(this Stream stream, byte[] buffer)
@@ -385,6 +449,23 @@ namespace OsmSharp.IO.Binary
             relation.Members = members;
 
             return relation;
+        }
+
+        private static void SkipRelation(this Stream stream)
+        {
+            var memberCount = stream.ReadVarInt32();
+            if (memberCount <= 0) return;
+            
+            stream.ReadVarInt64();
+            stream.SkipStringWithSize();
+            stream.ReadOsmGeoType();
+                
+            for(var i = 1; i< memberCount; i++)
+            {
+                stream.ReadVarInt64();
+                stream.SkipStringWithSize();
+                stream.ReadOsmGeoType();
+            }
         }
 
         private static void WriteOsmGeoType(this Stream stream, OsmGeoType type)
@@ -549,6 +630,16 @@ namespace OsmSharp.IO.Binary
             stream.Read(buffer, 0, size);
 
             return System.Text.Encoding.Unicode.GetString(buffer, 0, size);
+        }
+
+        private static void SkipStringWithSize(this Stream stream)
+        {
+            var size = stream.ReadVarInt32();
+            if (size == 0) return;
+            if (size == 1) return;
+            
+            size -= 2;
+            stream.Seek(size, SeekOrigin.Current);
         }
     }
 }
