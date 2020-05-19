@@ -237,9 +237,6 @@ namespace OsmSharp.IO.Binary
         /// <returns>The id and type.</returns>
         public static (OsmGeoType type, long? id) ReadOsmGeoKey(this Stream stream)
         {            
-            if (stream.CanSeek &&
-                         stream.Length == stream.Position) throw new InvalidDataException("Could not read header.");;
-
             if (!stream.TryReadOsmGeoHeader(out var type, out var hasId, out var _, out var _,
                 out var _, out var _, out var _)) throw new InvalidDataException("Could not read header.");
 
@@ -256,9 +253,6 @@ namespace OsmSharp.IO.Binary
         /// <param name="stream">The stream.</param>
         public static void SkipOsmGeo(this Stream stream)
         {
-            if (stream.CanSeek &&
-                stream.Length == stream.Position) return;
-
             if (!stream.TryReadOsmGeoHeader(out var type, out var hasId, out var hasChangesetId, out var hasTimestamp,
                 out var hasUserId, out var hasVersion, out var hasVisible)) return; // couldn't read header.
             
@@ -301,9 +295,6 @@ namespace OsmSharp.IO.Binary
         /// </summary>
         public static OsmGeo ReadOsmGeo(this Stream stream, byte[] buffer = null)
         {
-            if (stream.CanSeek &&
-                stream.Length == stream.Position) return null;
-
             if (!stream.TryReadOsmGeoHeader(out var type, out var hasId, out var hasChangesetId, out var hasTimestamp,
                 out var hasUserId, out var hasVersion, out var hasVisible)) return null; // couldn't read header.
             
