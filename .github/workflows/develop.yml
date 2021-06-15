@@ -13,6 +13,12 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: 'true'
+    - name: Prepare NuGet.Config
+      uses: datamonsters/replace-action@v2
+      with:
+        files: 'NuGet.Config.actions'
+        replacements: '%%username%%=xivk,%%token%%=${{ secrets.PACKAGES_SECRET }},%%username%%=xivk,%%token%%=${{ secrets.PACKAGES_SECRET }},%%username%%=xivk,%%token%%=${{ secrets.PACKAGES_SECRET }}'
+    - run: mv NuGet.Config.actions NuGet.Config 
     - name: Setup .NET Core 5.
       uses: actions/setup-dotnet@v1
       with:
