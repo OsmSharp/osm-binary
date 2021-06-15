@@ -15,6 +15,6 @@
     <LangVersion>default</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="OsmSharp" Version="7.0.0-pre014" />
+    <PackageReference Include="OsmSharp" Version="7.0.0-pre017" />
   </ItemGroup>
 </Project>

@@ -56,3 +56,4 @@ src/OsmSharp.IO.Binary.CLI/**/*.osc
 
 **/logs/*
 **/*.bin.zip
+test*.osm
