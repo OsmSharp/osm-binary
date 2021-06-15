@@ -33,7 +33,6 @@ TestResults*/
 *.vspx
 *.patch
 *.osm.pbf
-*.osm.bin
 TestResult.xml
 .vs*/
 .idea*/
@@ -50,6 +49,9 @@ src/OsmSharp.IO.Binary.CLI/**/*.osm
 src/OsmSharp.IO.Binary.CLI/**/*.db
 src/OsmSharp.IO.Binary.CLI/**/*.hash
 src/OsmSharp.IO.Binary.CLI/**/*.osc
+test/OsmSharp.IO.Binary.Test.Functional/**/*.osm
+test/OsmSharp.IO.Binary.Test.Functional/**/*.osm.bin
+test/OsmSharp.IO.Binary.Test.Functional/**/*.osm.pbf
 
 .idea*/
 
